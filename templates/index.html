@@ -1,0 +1,71 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>École Connectée</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body>
+    <div id="app">
+      <div class="login-container">
+        <div class="login-card">
+          <div class="login-header">
+            <h1>COLLEGE PRIVE KOROKO</h1>
+            <p>Accédez à votre espace personnel</p>
+          </div>
+          
+          <form id="loginForm" class="login-form">
+            <div class="form-group">
+              <label for="role">Type de compte</label>
+              <select id="role" name="role" required>
+                <option value="" disabled selected>Sélectionnez votre profil</option>
+                <option value="parent">Parent</option>
+                <option value="teacher">Enseignant</option>
+                <option value="admin">Administrateur</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="votre.email@exemple.fr" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="password">Mot de passe</label>
+              <input type="password" id="password" name="password" placeholder="••••••••" required>
+              <a href="#" class="forgot-password">Mot de passe oublié?</a>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block" id="loginButton">Se connecter</button>
+            
+            <div class="demo-logins">
+              <p>Connexion rapide </p>
+              <div class="demo-buttons">
+                <button type="button" class="btn btn-outline-secondary" data-role="parent">Parent</button>
+                <button type="button" class="btn btn-outline-secondary" data-role="teacher">Enseignant</button>
+                <button type="button" class="btn btn-outline-secondary" data-role="admin">Admin</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Notification toast -->
+    <div id="toast" class="toast">
+      <div class="toast-header">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong class="toast-title">Notification</strong>
+        <button class="toast-close">&times;</button>
+      </div>
+      <div class="toast-body">Message</div>
+    </div>
+    
+    <script src="{% static 'js/auth.js' %}"></script>
+  </body>
+</html>

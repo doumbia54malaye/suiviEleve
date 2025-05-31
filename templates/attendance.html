@@ -1,0 +1,163 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faire l'appel - École Connectée</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body>
+    <div id="app">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <!-- Même sidebar que dashboard.html -->
+        <div class="sidebar-logo">
+          <div class="logo-icon">
+            <i class="fa-solid fa-school"></i>
+          </div>
+          <span class="logo-text">École Connectée</span>
+        </div>
+        
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="sidebar-link">
+            <i class="fa-solid fa-gauge"></i>
+            <span>Tableau de bord</span>
+          </a>
+          <div id="roleSpecificLinks"></div>
+        </nav>
+        
+        <div class="sidebar-toggle" id="sidebarToggle">
+          <i class="fa-solid fa-chevron-left"></i>
+        </div>
+      </aside>
+      
+      <!-- Main content -->
+      <div class="main-content">
+        <!-- Top navbar -->
+        <header class="top-navbar">
+          <!-- Même navbar que dashboard.html -->
+          <div class="navbar-left">
+            <button class="menu-toggle" id="menuToggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+          
+          <div class="navbar-right">
+            <div class="notifications">
+              <button class="notification-btn" id="notificationBtn">
+                <i class="fa-solid fa-bell"></i>
+                <span class="badge">2</span>
+              </button>
+              <div class="notification-dropdown" id="notificationDropdown">
+                <h3>Notifications</h3>
+                <!-- Contenu des notifications -->
+              </div>
+            </div>
+            
+            <div class="user-menu">
+              <button class="user-btn" id="userBtn">
+                <div class="avatar">
+                  <span id="userInitials">EC</span>
+                </div>
+                <div class="user-info">
+                  <span id="userName">Utilisateur</span>
+                  <span id="userRole" class="user-role">Rôle</span>
+                </div>
+              </button>
+              <div class="user-dropdown" id="userDropdown">
+                <!-- Options du menu utilisateur -->
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        <!-- Page content -->
+        <main class="content-container">
+          <div class="page-header">
+            <h1>Faire l'appel</h1>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2>Faire l'appel</h2>
+              <p>Renseignez les informations du cours et marquez les élèves absents</p>
+            </div>
+            
+            <div class="card-body">
+              <form id="attendanceForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="class">Classe</label>
+                    <select id="class" name="class" required>
+                      <option value="" selected disabled>Sélectionner une classe</option>
+                      <option value="6e A">6e A</option>
+                      <option value="5e B">5e B</option>
+                      <option value="4e A">4e A</option>
+                      <option value="3e C">3e C</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="subject">Matière</label>
+                    <select id="subject" name="subject" required>
+                      <option value="" selected disabled>Sélectionner une matière</option>
+                      <option value="Mathématiques">Mathématiques</option>
+                      <option value="Français">Français</option>
+                      <option value="Histoire-Géo">Histoire-Géo</option>
+                      <option value="Anglais">Anglais</option>
+                      <option value="SVT">SVT</option>
+                      <option value="Physique-Chimie">Physique-Chimie</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="timeSlot">Horaire</label>
+                    <select id="timeSlot" name="timeSlot" required>
+                      <option value="" selected disabled>Sélectionner un horaire</option>
+                      <option value="8h-9h">8h-9h</option>
+                      <option value="9h-10h">9h-10h</option>
+                      <option value="10h-11h">10h-11h</option>
+                      <option value="11h-12h">11h-12h</option>
+                      <option value="13h-14h">13h-14h</option>
+                      <option value="14h-15h">14h-15h</option>
+                      <option value="15h-16h">15h-16h</option>
+                      <option value="16h-17h">16h-17h</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="students-list" id="studentsList">
+                  <div class="placeholder-message">
+                    Veuillez sélectionner une classe pour afficher la liste des élèves
+                  </div>
+                </div>
+                
+                <div class="form-actions">
+                  <button type="reset" class="btn btn-outline-secondary" id="resetBtn">Réinitialiser</button>
+                  <button type="submit" class="btn btn-primary" id="submitBtn">Enregistrer l'appel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+    
+    <!-- Notification toast -->
+    <div id="toast" class="toast">
+      <div class="toast-header">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong class="toast-title">Notification</strong>
+        <button class="toast-close">&times;</button>
+      </div>
+      <div class="toast-body">Message</div>
+    </div>
+    
+    <script src="{% static 'js/common.js' %}"></script>
+    <script src="{% static 'js/attendance.js' %}"></script>
+  </body>
+</html>

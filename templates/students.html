@@ -1,0 +1,281 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>École Connectée - Gestion des élèves</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/students.css' %}">
+</head>
+<body>
+    <div id="app">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <span class="logo-text">École Connectée</span>
+            </div>
+         
+                <a href="students.html" class="sidebar-link active">
+                    <i class="fas fa-users"></i>
+                    <span>Élèves</span>
+                </a>
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <span>Enseignants</span>
+                </a>
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-door-open"></i>
+                    <span>Classes</span>
+                </a>
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Emplois du temps</span>
+                </a>
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Notes</span>
+                </a>
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-user-check"></i>
+                    <span>Présences</span>
+                </a>
+                <a href="#" class="sidebar-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres</span>
+                </a>
+            </div>
+            <div class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Top Navbar -->
+            <div class="top-navbar">
+                <div class="navbar-left">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>Gestion des élèves</h2>
+                </div>
+                <div class="navbar-right">
+                    <div class="notifications">
+                        <button class="notification-btn" id="notificationBtn">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge">3</span>
+                        </button>
+                        <div class="notification-dropdown" id="notificationDropdown">
+                            <h3>Notifications</h3>
+                            <div class="notification-item">
+                                <div class="notification-content">
+                                    <h4>Nouvel élève inscrit</h4>
+                                    <p>Emma Dupont a été ajoutée à la classe 6e A</p>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-content">
+                                    <h4>Absence signalée</h4>
+                                    <p>Tom Martin sera absent du 10 au 15 mai</p>
+                                </div>
+                            </div>
+                            <div class="notification-item">
+                                <div class="notification-content">
+                                    <h4>Réunion des enseignants</h4>
+                                    <p>Réunion planifiée pour le 24 mai à 14h</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-menu">
+                        <button class="user-btn" id="userBtn">
+                            <div class="avatar">AD</div>
+                            <div class="user-info">
+                                <span id="userName">Admin Demo</span>
+                                <span class="user-role">Administrateur</span>
+                            </div>
+                        </button>
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-user"></i> Mon profil
+                            </a>
+                            <a href="#" class="dropdown-item">
+                                <i class="fas fa-cog"></i> Paramètres
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a href="index.html" class="dropdown-item" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt"></i> Déconnexion
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Container -->
+            <div class="content-container">
+                <!-- Header Actions -->
+                <div class="student-actions">
+                    <div class="student-filters">
+                        <select id="classFilter" class="select-filter">
+                            <option value="">Toutes les classes</option>
+                            <option value="6e A">6e A</option>
+                            <option value="6e B">6e B</option>
+                            <option value="5e A">5e A</option>
+                            <option value="5e B">5e B</option>
+                            <option value="4e A">4e A</option>
+                            <option value="4e B">4e B</option>
+                            <option value="3e A">3e A</option>
+                            <option value="3e C">3e C</option>
+                        </select>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="studentSearch" placeholder="Rechercher un élève...">
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline-secondary" id="printList">
+                            <i class="fas fa-print"></i> Imprimer
+                        </button>
+                        <button class="btn btn-outline-secondary" id="exportData">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                        <button onclick="document.getElementById('form-ajout').style.display='block'"> id="addStudentBtn">
+                            <i class="fas fa-user-plus"></i> Ajouter un élève 
+                        </button>
+                        <div id="form-ajout" style="display:none; margin-top:20px;">
+                        <h3>Ajouter un élève</h3>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            <button type="submit">Enregistrer</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Liste des élèves</h2>
+                        <p id="studentCount">8 élèves au total</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="studentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Classe</th>
+                                        <th>Date de naissance</th>
+                                        <th>Téléphone parent</th>
+                                        <th>Absences</th>
+                                        <th>Moyenne</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentsTableBody">
+                                    <!-- Student rows will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Ajouter un nouvel élève</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">Prénom</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Nom</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="class">Classe</label>
+                            <select id="class" name="class" required>
+                                <option value="">Sélectionner une classe</option>
+                                <option value="6e A">6e A</option>
+                                <option value="6e B">6e B</option>
+                                <option value="5e A">5e A</option>
+                                <option value="5e B">5e B</option>
+                                <option value="4e A">4e A</option>
+                                <option value="4e B">4e B</option>
+                                <option value="3e A">3e A</option>
+                                <option value="3e C">3e C</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthDate">Date de naissance</label>
+                            <input type="text" id="birthDate" name="birthDate" placeholder="JJ/MM/AAAA" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="parentPhone">Téléphone du parent</label>
+                        <input type="text" id="parentPhone" name="parentPhone" required>
+                    </div>
+                    <input type="hidden" id="studentId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" id="cancelBtn">Annuler</button>
+                <button class="btn btn-primary" id="saveStudentBtn">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmer la suppression</h3>
+                <button class="modal-close" id="closeDeleteModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer cet élève ? Cette action est irréversible.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" id="cancelDeleteBtn">Annuler</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast for notifications -->
+    <div class="toast" id="toast">
+        <div class="toast-header">
+            <i class="fas fa-info-circle"></i>
+            <div class="toast-title" id="toastTitle">Notification</div>
+            <button class="toast-close" id="closeToast">&times;</button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            Message de notification
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/common.js' %}"></script>
+    <script src="{% static 'js/students.js' %}"></script>
+</body>
+</html>

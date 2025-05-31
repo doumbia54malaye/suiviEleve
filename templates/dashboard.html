@@ -1,0 +1,126 @@
+
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tableau de bord - École Connectée</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body>
+    <div id="app">
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-icon">
+            <i class="fa-solid fa-school"></i>
+          </div>
+          <span class="logo-text">École Connectée</span>
+        </div>
+        
+        <nav class="sidebar-menu">
+          <a href="dashboard.html" class="sidebar-link active">
+            <i class="fa-solid fa-gauge"></i>
+            <span>Tableau de bord</span>
+          </a>
+          <!-- Liens dynamiques selon le rôle -->
+          <div id="roleSpecificLinks"></div>
+        </nav>
+        
+        <div class="sidebar-toggle" id="sidebarToggle">
+          <i class="fa-solid fa-chevron-left"></i>
+        </div>
+      </aside>
+      
+      <!-- Main content -->
+      <div class="main-content">
+        <!-- Top navbar -->
+        <header class="top-navbar">
+          <div class="navbar-left">
+            <button class="menu-toggle" id="menuToggle">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+          </div>
+          
+          <div class="navbar-right">
+            <div class="notifications">
+              <button class="notification-btn" id="notificationBtn">
+                <i class="fa-solid fa-bell"></i>
+                <span class="badge">2</span>
+              </button>
+              <div class="notification-dropdown" id="notificationDropdown">
+                <h3>Notifications</h3>
+                <div class="notification-item">
+                  <div class="notification-content">
+                    <h4>Absence signalée</h4>
+                    <p>Votre enfant a été absent aujourd'hui</p>
+                  </div>
+                </div>
+                <div class="notification-item">
+                  <div class="notification-content">
+                    <h4>Nouvelle note</h4>
+                    <p>Note de Mathématiques: 16/20</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="user-menu">
+              <button class="user-btn" id="userBtn">
+                <div class="avatar">
+                  <span id="userInitials">EC</span>
+                </div>
+                <div class="user-info">
+                  <span id="userName">Utilisateur</span>
+                  <span id="userRole" class="user-role">Rôle</span>
+                </div>
+              </button>
+              <div class="user-dropdown" id="userDropdown">
+                <h3>Mon compte</h3>
+                <a href="#" class="dropdown-item">Profil</a>
+                <a href="#" class="dropdown-item">Paramètres</a>
+                <div class="dropdown-divider"></div>
+                <form action="{% url 'gestionAbst:logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item text-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        Déconnexion
+                    </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </header>
+        
+        <!-- Page content -->
+        <main class="content-container">
+          <div class="page-header">
+            <h1>Tableau de bord</h1>
+          </div>
+          
+          <div class="dashboard-content" id="dashboardContent">
+            <!-- Le contenu sera chargé dynamiquement en fonction du rôle -->
+          </div>
+        </main>
+      </div>
+    </div>
+    
+    <!-- Notification toast -->
+    <div id="toast" class="toast">
+      <div class="toast-header">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong class="toast-title">Notification</strong>
+        <button class="toast-close">&times;</button>
+      </div>
+      <div class="toast-body">Message</div>
+    </div>
+    
+    <script src="{% static 'js/common.js' %}"></script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
+   
+  </body>
+</html>
