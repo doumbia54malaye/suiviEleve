@@ -1,0 +1,453 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .filter-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .table-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .table thead {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+        }
+        .table th {
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #f1f3f4;
+        }
+        .btn-action {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+        }
+        .btn-primary-custom:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        .badge-status {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .badge-actif {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-inactif {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .search-bar {
+            position: relative;
+        }
+        .search-bar i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .pagination-custom .page-link {
+            border: none;
+            color: #3498db;
+            margin: 0 2px;
+            border-radius: 8px;
+        }
+        .pagination-custom .page-item.active .page-link {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+        }
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            .btn-action {
+                padding: 3px 6px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- En-tête de la page -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-users"></i> {{ title }}</h1>
+                    <p class="mb-0">Gestion et suivi des élèves inscrits</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'inscription_eleve' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus"></i> Nouvel élève
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="mb-1">{{ eleves|length }}</h3>
+                    <p class="text-muted mb-0">Total élèves</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-success">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <h3 class="mb-1">{{ eleves|length }}</h3>
+                    <p class="text-muted mb-0">Élèves actifs</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-info">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <h3 class="mb-1">{{ classes|length }}</h3>
+                    <p class="text-muted mb-0">Classes</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-warning">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h3 class="mb-1">2024-2025</h3>
+                    <p class="text-muted mb-0">Année scolaire</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Filtres et recherche -->
+        <div class="filter-card">
+            <form method="get" class="row g-3" id="filterForm">
+                <div class="col-md-4">
+                    <label class="form-label">Rechercher un élève</label>
+                    <div class="search-bar">
+                        <input type="text" class="form-control" name="search" 
+                               placeholder="Nom, prénoms ou matricule..." 
+                               value="{{ request.GET.search }}">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Classe</label>
+                    <select name="classe" class="form-control">
+                        <option value="">Toutes les classes</option>
+                        {% for classe in classes %}
+                            <option value="{{ classe.id }}" 
+                                    {% if classe_selectionnee == classe.id|stringformat:"s" %}selected{% endif %}>
+                                {{ classe }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Statut</label>
+                    <select name="statut" class="form-control">
+                        <option value="">Tous les statuts</option>
+                        <option value="actif" {% if statut_selectionne == "actif" %}selected{% endif %}>
+                            Actifs seulement
+                        </option>
+                        <option value="inactif" {% if statut_selectionne == "inactif" %}selected{% endif %}>
+                            Inactifs seulement
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="fas fa-filter"></i> Filtrer
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tableau des élèves -->
+        <div class="table-card">
+            {% if eleves %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Matricule</th>
+                                <th>Nom complet</th>
+                                <th>Classe</th>
+                                <th>Date naissance</th>
+                                <th>Parent/Tuteur</th>
+                                <th>Téléphone</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for eleve in eleves %}
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">{{ eleve.matricule }}</strong>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <strong>{{ eleve.nom_complet }}</strong>
+                                            <br>
+                                            <small class="text-muted">
+                                                Inscrit le {{ eleve.created_at|date:"d/m/Y" }}
+                                            </small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ eleve.classe }}</span>
+                                    </td>
+                                    <td>{{ eleve.date_naissance|date:"d/m/Y" }}</td>
+                                    <td>{{ eleve.nom_parent }}</td>
+                                    <td>
+                                        <a href="tel:{{ eleve.telephone_parent }}" class="text-decoration-none">
+                                            <i class="fas fa-phone"></i> {{ eleve.telephone_parent }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if eleve.actif %}
+                                            <span class="badge-status badge-actif">
+                                                <i class="fas fa-check-circle"></i> Actif
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-status badge-inactif">
+                                                <i class="fas fa-times-circle"></i> Inactif
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap">
+                                            <a href="{% url 'detail_eleve' eleve.id %}" 
+                                               class="btn-action btn btn-info btn-sm" 
+                                               title="Voir détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'modifier_eleve' eleve.id %}" 
+                                               class="btn-action btn btn-warning btn-sm" 
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn-action btn btn-danger btn-sm" 
+                                                    title="Supprimer"
+                                                    onclick="confirmerSuppression('{{ eleve.id }}', '{{ eleve.nom_complet }}')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-user-slash"></i>
+                    <h3>Aucun élève trouvé</h3>
+                    <p>
+                        {% if request.GET.search or classe_selectionnee or statut_selectionne %}
+                            Aucun élève ne correspond aux critères de recherche.
+                            <br><a href="{% url 'liste_eleves' %}" class="btn btn-link">Réinitialiser les filtres</a>
+                        {% else %}
+                            Commencez par inscrire votre premier élève.
+                            <br><a href="{% url 'inscription_eleve' %}" class="btn btn-primary mt-3">
+                                <i class="fas fa-plus"></i> Inscrire un élève
+                            </a>
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination (à ajouter si nécessaire) -->
+        {% comment %}
+        {% if is_paginated %}
+            <nav class="mt-4">
+                <ul class="pagination pagination-custom justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+        {% endcomment %}
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> 
+                        Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer l'élève <strong id="eleveNom"></strong> ?</p>
+                    <p class="text-danger">
+                        <i class="fas fa-warning"></i> 
+                        Cette action est irréversible.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="post" id="deleteForm" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fonction pour confirmer la suppression
+        function confirmerSuppression(eleveId, eleveNom) {
+            document.getElementById('eleveNom').textContent = eleveNom;
+            document.getElementById('deleteForm').action = `/eleves/supprimer/${eleveId}/`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Auto-submit du formulaire de filtre lors du changement
+        document.querySelectorAll('#filterForm select').forEach(select => {
+            select.addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+        });
+
+        // Recherche avec délai
+        let searchTimeout;
+        document.querySelector('input[name="search"]').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                document.getElementById('filterForm').submit();
+            }, 500);
+        });
+
+        // Raccourcis clavier
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + N pour nouveau élève
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                window.location.href = "{% url 'inscription_eleve' %}";
+            }
+            
+            // Escape pour réinitialiser les filtres
+            if (e.key === 'Escape') {
+                window.location.href = "{% url 'liste_eleves' %}";
+            }
+        });
+    </script>
+</body>
+</html>

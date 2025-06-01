@@ -297,7 +297,7 @@ function escapeHtml(unsafe) {
             <div class="card-header"><h2>Actions rapides</h2></div>
             <div class="card-body">
               <div class="quick-actions">
-                <a href="/students/" class="quick-action-btn">  
+                <a href="/inscriptions/" class="quick-action-btn">  
                   <i class="fa-solid fa-user-plus"></i>
                   <span>Ajouter un élève</span>
                 </a>

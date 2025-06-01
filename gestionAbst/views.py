@@ -2,32 +2,23 @@
 from django.http import JsonResponse, HttpResponse # Assurez-vous que HttpResponse est importé
 from django.contrib.auth import authenticate, login, logout # Assurez-vous que logout est importé
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 import json
-from .models import CustomUser, Eleve, Classe, Presence, Seance # Importez les modèles nécessaires
-# from .forms import EleveForm # Décommentez si utilisé ailleurs
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, login_required
 from django.utils import timezone # Pour filtrer les absences du jourfrom django.contrib.auth import authenticate, login
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-import json
 from .models import *
 from .forms import EleveForm
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-from django.views.decorators.http import require_POST
-
+from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
 def index(request):
-    # Concernant ce chemin de template, voir la note plus bas
+   
     return render(request, 'index.html') 
-# views.py
+
 def students(request):
     return render(request, 'students.html')
 
-#vue form pour dashboard admin
 @login_required
 def dashboard_view(request):
     eleves = Eleve.objects.all()
@@ -272,3 +263,125 @@ def api_parent_dashboard_data(request):
         'enfants_data': enfants_data,
         'userName': f"{parent.first_name} {parent.last_name}"
     })
+#inscriptions des élèves
+
+def inscription_eleve(request):
+    """Vue pour l'inscription d'un nouvel élève"""
+    if request.method == 'POST':
+        form = EleveForm(request.POST)
+        if form.is_valid():
+            eleve = form.save()
+            messages.success(
+                request, 
+                f"L'élève {eleve.nom_complet} a été inscrit avec succès ! Matricule: {eleve.matricule}"
+            )
+            return redirect('gestionAbst:liste_eleves')  # Remplacez par votre URL de liste
+        else:
+            messages.error(request, "Veuillez corriger les erreurs ci-dessous.")
+    else:
+        form = EleveForm()
+    
+    context = {
+        'form': form,
+        'title': 'Inscription d\'un nouvel élève',
+        'classes': Classe.objects.all()
+    }
+    return render(request, 'inscriptions.html', context)
+
+def modifier_eleve(request, eleve_id):
+    """Vue pour modifier un élève existant"""
+    eleve = get_object_or_404(Eleve, id=eleve_id)
+    
+    if request.method == 'POST':
+        form = EleveForm(request.POST, instance=eleve)
+        if form.is_valid():
+            eleve = form.save()
+            messages.success(
+                request, 
+                f"Les informations de {eleve.nom_complet} ont été mises à jour avec succès."
+            )
+            return redirect('detail_eleve', eleve_id=eleve.id)
+        else:
+            messages.error(request, "Veuillez corriger les erreurs ci-dessous.")
+    else:
+        form = EleveForm(instance=eleve)
+    
+    context = {
+        'form': form,
+        'eleve': eleve,
+        'title': f'Modifier {eleve.nom_complet}',
+        'classes': Classe.objects.all()
+    }
+    return render(request, 'inscriptions.html', context)
+
+def liste_eleves(request):
+    """Vue pour afficher la liste des élèves"""
+    eleves = Eleve.objects.select_related('classe').all()
+    
+    eleves = Eleve.objects.select_related('classe').all()
+    
+    # Recherche textuelle
+    # Recherche textuelle
+    search = request.GET.get('search')
+    if search:
+        eleves = eleves.filter(
+            Q(nom__icontains=search) |
+            Q(prenoms__icontains=search) |
+            Q(matricule__icontains=search)
+        )
+    # Filtrage optionnel par classe
+    classe_id = request.GET.get('classe')
+    if classe_id:
+        eleves = eleves.filter(classe_id=classe_id)
+    
+    # Filtrage par statut (actif/inactif)
+    statut = request.GET.get('statut')
+    if statut == 'actif':
+        eleves = eleves.filter(actif=True)
+    elif statut == 'inactif':
+        eleves = eleves.filter(actif=False)
+    
+    context = {
+        'eleves': eleves,
+        'classes': Classe.objects.all(),
+        'classe_selectionnee': classe_id,
+        'statut_selectionne': statut,
+        'title': 'Liste des élèves'
+    }
+    return render(request, 'liste.html', context)
+
+def detail_eleve(request, eleve_id):
+    """Vue pour afficher les détails d'un élève"""
+    eleve = get_object_or_404(Eleve, id=eleve_id)
+    
+    context = {
+        'eleve': eleve,
+        'title': f'Détails de {eleve.nom_complet}'
+    }
+    return render(request, 'detail.html', context)
+
+@require_http_methods(["POST"])
+def supprimer_eleve(request, eleve_id):
+    """Vue pour supprimer un élève"""
+    eleve = get_object_or_404(Eleve, id=eleve_id)
+    nom_complet = eleve.nom_complet
+    
+    eleve.delete()
+    messages.success(request, f"L'élève {nom_complet} a été supprimé avec succès.")
+    
+    return redirect('gestionAbst:liste_eleves')
+
+def verifier_matricule(request):
+    """Vue AJAX pour vérifier si un matricule existe déjà"""
+    matricule = request.GET.get('matricule')
+    eleve_id = request.GET.get('eleve_id')  # Pour l'édition
+    
+    if matricule:
+        query = Eleve.objects.filter(matricule=matricule)
+        if eleve_id:  # En mode édition, exclure l'élève actuel
+            query = query.exclude(id=eleve_id)
+        
+        existe = query.exists()
+        return JsonResponse({'existe': existe})
+    
+    return JsonResponse({'existe': False})

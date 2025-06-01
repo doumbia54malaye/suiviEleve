@@ -1,0 +1,595 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 200"><polygon fill="rgba(255,255,255,0.1)" points="0,0 1000,0 1000,200 0,100"/></svg>');
+            background-size: cover;
+        }
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border: 4px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            margin: 0 auto 20px;
+            position: relative;
+            z-index: 2;
+        }
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        .info-section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f1f3f4;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .status-actif {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        .status-inactif {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn-custom {
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            color: white;
+        }
+        .btn-warning-custom {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+        }
+        .btn-warning-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+            color: white;
+        }
+        .btn-danger-custom {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        .btn-danger-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+            color: white;
+        }
+        .btn-secondary-custom {
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        .btn-secondary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
+            color: white;
+        }
+        .contact-link {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .contact-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        .breadcrumb-custom {
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+        }
+        .breadcrumb-custom .breadcrumb {
+            margin: 0;
+        }
+        .breadcrumb-custom .breadcrumb-item a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 40px;
+            padding-bottom: 20px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 8px;
+            width: 10px;
+            height: 10px;
+            background: #3498db;
+            border-radius: 50%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 18px;
+            width: 2px;
+            height: calc(100% - 10px);
+            background: #e9ecef;
+        }
+        .timeline-item:last-child::after {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .profile-avatar {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn-custom {
+                width: 100%;
+                justify-content: center;
+            }
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- En-tête du profil -->
+    <div class="profile-header">
+        <div class="container">
+            <div class="text-center">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h1 class="mb-2">{{ eleve.nom_complet }}</h1>
+                <p class="mb-3">
+                    <i class="fas fa-id-card me-2"></i>
+                    Matricule: <strong>{{ eleve.matricule }}</strong>
+                </p>
+                <div>
+                    {% if eleve.actif %}
+                        <span class="status-badge status-actif">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Élève Actif
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-inactif">
+                            <i class="fas fa-times-circle me-1"></i>
+                            Élève Inactif
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Fil d'Ariane -->
+        <div class="breadcrumb-custom">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'liste_eleves' %}">
+                            <i class="fas fa-users me-1"></i>Liste des élèves
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">{{ eleve.nom_complet }}</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Informations personnelles -->
+            <div class="col-lg-8">
+                <div class="info-card">
+                    <h3 class="info-section-title">
+                        <i class="fas fa-user"></i>
+                        Informations personnelles
+                    </h3>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-signature"></i>
+                            Nom complet
+                        </span>
+                        <span class="info-value">{{ eleve.nom_complet }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-id-badge"></i>
+                            Matricule
+                        </span>
+                        <span class="info-value">
+                            <code class="bg-light px-2 py-1 rounded">{{ eleve.matricule }}</code>
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-birthday-cake"></i>
+                            Date de naissance
+                        </span>
+                        <span class="info-value">
+                            {{ eleve.date_naissance|date:"l d F Y" }}
+                            <small class="text-muted ms-2">
+                                ({{ eleve.date_naissance|timesince }} ans)
+                            </small>
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-school"></i>
+                            Classe
+                        </span>
+                        <span class="info-value">
+                            <span class="badge bg-primary fs-6">{{ eleve.classe }}</span>
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-toggle-on"></i>
+                            Statut
+                        </span>
+                        <span class="info-value">
+                            {% if eleve.actif %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Actif
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-times me-1"></i>Inactif
+                                </span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Informations des parents -->
+                <div class="info-card">
+                    <h3 class="info-section-title">
+                        <i class="fas fa-users"></i>
+                        Informations du parent/tuteur
+                    </h3>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-user-tie"></i>
+                            Nom du parent/tuteur
+                        </span>
+                        <span class="info-value">{{ eleve.nom_parent }}</span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-phone"></i>
+                            Téléphone
+                        </span>
+                        <span class="info-value">
+                            <a href="tel:{{ eleve.telephone_parent }}" class="contact-link">
+                                <i class="fas fa-phone me-1"></i>
+                                {{ eleve.telephone_parent }}
+                            </a>
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </span>
+                        <span class="info-value">
+                            {% if eleve.email_parent %}
+                                <a href="mailto:{{ eleve.email_parent }}" class="contact-link">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    {{ eleve.email_parent }}
+                                </a>
+                            {% else %}
+                                <span class="text-muted">
+                                    <i class="fas fa-minus"></i> Non renseigné
+                                </span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations complémentaires -->
+            <div class="col-lg-4">
+                <!-- Résumé rapide -->
+                <div class="info-card">
+                    <h3 class="info-section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Résumé
+                    </h3>
+                    
+                    <div class="text-center mb-3">
+                        <div class="profile-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h5>{{ eleve.nom_complet }}</h5>
+                        <p class="text-muted">{{ eleve.classe }}</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="tel:{{ eleve.telephone_parent }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-phone me-2"></i>Appeler parent
+                        </a>
+                        {% if eleve.email_parent %}
+                            <a href="mailto:{{ eleve.email_parent }}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-envelope me-2"></i>Envoyer email
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Historique -->
+                <div class="info-card">
+                    <h3 class="info-section-title">
+                        <i class="fas fa-history"></i>
+                        Historique
+                    </h3>
+                    
+                    <div class="timeline-item">
+                        <strong>Inscription</strong>
+                        <br>
+                        <small class="text-muted">
+                            {{ eleve.created_at|date:"d/m/Y à H:i" }}
+                        </small>
+                        <p class="mb-0 mt-1">
+                            <small>Élève inscrit dans le système</small>
+                        </p>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <strong>Classe assignée</strong>
+                        <br>
+                        <small class="text-muted">{{ eleve.classe }}</small>
+                        <p class="mb-0 mt-1">
+                            <small>Affectation en classe {{ eleve.classe }}</small>
+                        </p>
+                    </div>
+                    
+                    {% if not eleve.actif %}
+                        <div class="timeline-item">
+                            <strong>Statut modifié</strong>
+                            <br>
+                            <small class="text-danger">Élève désactivé</small>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Boutons d'action -->
+        <div class="action-buttons">
+            <a href="{% url 'modifier_eleve' eleve.id %}" class="btn-custom btn-warning-custom">
+                <i class="fas fa-edit"></i>
+                Modifier les informations
+            </a>
+            
+            <button type="button" class="btn-custom btn-danger-custom" 
+                    onclick="confirmerSuppression('{{ eleve.id }}', '{{ eleve.nom_complet }}')">
+                <i class="fas fa-trash"></i>
+                Supprimer l'élève
+            </button>
+            
+            <a href="{% url 'liste_eleves' %}" class="btn-custom btn-secondary-custom">
+                <i class="fas fa-arrow-left"></i>
+                Retour à la liste
+            </a>
+            
+            <button type="button" class="btn-custom btn-primary-custom" onclick="window.print()">
+                <i class="fas fa-print"></i>
+                Imprimer la fiche
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> 
+                        Confirmer la suppression
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-times fa-3x text-danger mb-3"></i>
+                        <h5>Supprimer l'élève</h5>
+                    </div>
+                    <p>Êtes-vous sûr de vouloir supprimer définitivement l'élève <strong id="eleveNom"></strong> ?</p>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Attention !</strong> Cette action est irréversible et supprimera toutes les données liées à cet élève.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Annuler
+                    </button>
+                    <form method="post" id="deleteForm" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i>Supprimer définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fonction pour confirmer la suppression
+        function confirmerSuppression(eleveId, eleveNom) {
+            document.getElementById('eleveNom').textContent = eleveNom;
+            document.getElementById('deleteForm').action = `/eleves/supprimer/${eleveId}/`;
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Raccourcis clavier
+        document.addEventListener('keydown', function(e) {
+            // E pour modifier
+            if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
+                const target = e.target;
+                if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    window.location.href = "{% url 'modifier_eleve' eleve.id %}";
+                }
+            }
+            
+            // Escape ou B pour retour
+            if (e.key === 'Escape' || e.key === 'b') {
+                if (!document.querySelector('.modal.show')) {
+                    window.location.href = "{% url 'liste_eleves' %}";
+                }
+            }
+            
+            // Ctrl/Cmd + P pour imprimer
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+            }
+        });
+
+        // Animation d'entrée
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.info-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 100);
+            });
+        });
+
+        // Style d'impression
+        const printStyles = `
+            @media print {
+                .action-buttons, .breadcrumb-custom, .btn { display: none !important; }
+                .info-card { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+                .profile-header { background: #f8f9fa !important; color: #333 !important; }
+                body { font-size: 12px; }
+                .container { max-width: none; }
+            }
+        `;
+        
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = printStyles;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>

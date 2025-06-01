@@ -1,0 +1,302 @@
+{% load static}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .form-header {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .form-body {
+            padding: 40px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #3498db, #2c3e50);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .required-field::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        .form-check-input:checked {
+            background-color: #3498db;
+            border-color: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h1><i class="fas fa-user-graduate"></i> {{ title }}</h1>
+                            <p class="mb-0">Remplissez tous les champs obligatoires</p>
+                        </div>
+                        
+                        <div class="form-body">
+                            <!-- Messages de succès/erreur -->
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <form method="post" id="eleveForm" novalidate>
+                                {% csrf_token %}
+                                
+                                <!-- Section Informations de l'élève -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-user"></i>
+                                        Informations de l'élève
+                                    </h3>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.nom.id_for_label }}" class="form-label required-field">
+                                                {{ form.nom.label }}
+                                            </label>
+                                            {{ form.nom }}
+                                            {% if form.nom.errors %}
+                                                <div class="error-message">{{ form.nom.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.prenoms.id_for_label }}" class="form-label required-field">
+                                                {{ form.prenoms.label }}
+                                            </label>
+                                            {{ form.prenoms }}
+                                            {% if form.prenoms.errors %}
+                                                <div class="error-message">{{ form.prenoms.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.date_naissance.id_for_label }}" class="form-label required-field">
+                                                {{ form.date_naissance.label }}
+                                            </label>
+                                            {{ form.date_naissance }}
+                                            {% if form.date_naissance.errors %}
+                                                <div class="error-message">{{ form.date_naissance.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.matricule.id_for_label }}" class="form-label required-field">
+                                                {{ form.matricule.label }}
+                                            </label>
+                                            {{ form.matricule }}
+                                            {% if form.matricule.errors %}
+                                                <div class="error-message">{{ form.matricule.errors.0 }}</div>
+                                            {% endif %}
+                                            <div id="matricule-feedback" class="error-message" style="display: none;"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="{{ form.classe.id_for_label }}" class="form-label required-field">
+                                                {{ form.classe.label }}
+                                            </label>
+                                            {{ form.classe }}
+                                            {% if form.classe.errors %}
+                                                <div class="error-message">{{ form.classe.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-3">
+                                            <div class="form-check mt-4 pt-2">
+                                                {{ form.actif }}
+                                                <label class="form-check-label" for="{{ form.actif.id_for_label }}">
+                                                    {{ form.actif.label }}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section Informations des parents -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-users"></i>
+                                        Informations du parent/tuteur
+                                    </h3>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <label for="{{ form.nom_parent.id_for_label }}" class="form-label required-field">
+                                                {{ form.nom_parent.label }}
+                                            </label>
+                                            {{ form.nom_parent }}
+                                            {% if form.nom_parent.errors %}
+                                                <div class="error-message">{{ form.nom_parent.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.telephone_parent.id_for_label }}" class="form-label required-field">
+                                                {{ form.telephone_parent.label }}
+                                            </label>
+                                            {{ form.telephone_parent }}
+                                            {% if form.telephone_parent.errors %}
+                                                <div class="error-message">{{ form.telephone_parent.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.email_parent.id_for_label }}" class="form-label">
+                                                {{ form.email_parent.label }}
+                                            </label>
+                                            {{ form.email_parent }}
+                                            {% if form.email_parent.errors %}
+                                                <div class="error-message">{{ form.email_parent.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-custom me-3">
+                                        <i class="fas fa-save"></i>
+                                        {% if eleve %}Modifier{% else %}Inscrire{% endif %} l'élève
+                                    </button>
+                                   <a href="{% url 'gestionAbst:liste_eleves' %}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Retour à la liste
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Vérification en temps réel du matricule
+        document.getElementById('id_matricule').addEventListener('blur', function() {
+            const matricule = this.value.trim();
+            const eleveId = '{{ eleve.id|default:"" }}';
+            const feedback = document.getElementById('matricule-feedback');
+            
+            if (matricule) {
+                fetch(`/verifier-matricule/?matricule=${encodeURIComponent(matricule)}&eleve_id=${eleveId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.existe) {
+                            feedback.textContent = 'Ce matricule existe déjà.';
+                            feedback.style.display = 'block';
+                            this.classList.add('is-invalid');
+                        } else {
+                            feedback.style.display = 'none';
+                            this.classList.remove('is-invalid');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la vérification:', error);
+                    });
+            }
+        });
+
+        // Validation côté client
+        document.getElementById('eleveForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            const requiredFields = ['id_nom', 'id_prenoms', 'id_date_naissance', 'id_matricule', 'id_classe', 'id_nom_parent', 'id_telephone_parent'];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && !field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else if (field) {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Veuillez remplir tous les champs obligatoires.');
+            }
+        });
+    </script>
+</body>
+</html>

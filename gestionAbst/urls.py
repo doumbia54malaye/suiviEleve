@@ -12,7 +12,20 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('students/', views.students, name='students'), 
      path('logout/', views.logout_view, name='logout'),
+    # Inscription et modification d'élèves
+    path('inscriptions/', views.inscription_eleve, name='inscription_eleve'),
+    path('modifier/<int:eleve_id>/', views.modifier_eleve, name='modifier_eleve'),
     
+    # Liste et détails des élèves
+    path('', views.liste_eleves, name='liste_eleves'),
+    path('detail/<int:eleve_id>/', views.detail_eleve, name='detail_eleve'),
+    
+    # Suppression d'élève
+    path('supprimer/<int:eleve_id>/', views.supprimer_eleve, name='supprimer_eleve'),
+    
+    # AJAX pour vérification matricule
+    path('verifier-matricule/', views.verifier_matricule, name='verifier_matricule'),
+
     #connexion et authentification
     path('api/auth/login/', views.login_api, name='login_api'),
     path('api/auth/logout/', views.logout_api, name='logout_api'),
@@ -38,5 +51,5 @@ urlpatterns = [
     # API endpoints
     path('api/save-attendance/', views.save_attendance, name='save_attendance'),
     path('api/save-grade/', views.save_grade, name='save_grade'),
-    
+  
 ]
