@@ -115,11 +115,11 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       case 'admin':
         links = `
-          <a href="students/" class="sidebar-link">
+          <a href="/liste/" class="sidebar-link">
             <i class="fa-solid fa-users"></i>
             <span>Élèves</span>
           </a>
-          <a href="teacher-management.html" class="sidebar-link">
+          <a href="/liste_enseignants/" class="sidebar-link">
             <i class="fa-solid fa-chalkboard-teacher"></i>
             <span>Enseignants</span>
           </a>

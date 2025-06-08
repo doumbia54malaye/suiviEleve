@@ -1,0 +1,490 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .form-header {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .form-body {
+            padding: 40px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        .section-title {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        .btn-custom {
+            background: linear-gradient(45deg, #3498db, #2c3e50);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .btn-add {
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        .btn-add:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .btn-remove {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        .btn-remove:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            color: white;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .required-field::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        .enseignement-item {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            position: relative;
+        }
+        .enseignement-item:hover {
+            border-color: #3498db;
+            box-shadow: 0 2px 10px rgba(52, 152, 219, 0.1);
+        }
+        .item-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .item-number {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+        .remove-btn-container {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+        #enseignements-container .enseignement-item:first-child .remove-btn-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-10 col-md-12">
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h1><i class="fas fa-chalkboard-teacher"></i> {{ title|default:"Inscription d'un enseignant" }}</h1>
+                            <p class="mb-0">Remplissez tous les champs obligatoires pour créer les enseignements</p>
+                        </div>
+                        
+                        <div class="form-body">
+                            <!-- Messages de succès/erreur -->
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <form method="post" id="enseignantForm" novalidate>
+                                {% csrf_token %}
+                                
+                                <!-- Section Informations de l'enseignant -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-user-tie"></i>
+                                        Informations de l'enseignant
+                                    </h3>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-8 mb-3">
+                                            <label for="enseignant" class="form-label required-field">
+                                                Enseignant
+                                            </label>
+                                            <select class="form-select" id="enseignant" name="enseignant" required>
+                                                <option value="">Choisissez un enseignant...</option>
+                                                {% for enseignant in enseignants %}
+                                                    <option value="{{ enseignant.id }}">
+                                                        {{ enseignant.first_name }} {{ enseignant.last_name }} ({{ enseignant.username }})
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                            <div class="error-message" id="enseignant-error" style="display: none;"></div>
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-3">
+                                            <label for="annee_scolaire" class="form-label required-field">
+                                                Année scolaire
+                                            </label>
+                                            <input type="text" class="form-control" id="annee_scolaire" name="annee_scolaire" 
+                                                   value="2024-2025" required pattern="[0-9]{4}-[0-9]{4}">
+                                            <div class="error-message" id="annee-error" style="display: none;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section Enseignements -->
+                                <div class="form-section">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h3 class="section-title mb-0">
+                                            <i class="fas fa-book-open"></i>
+                                            Matières et Classes enseignées
+                                        </h3>
+                                        <button type="button" class="btn btn-add" id="add-enseignement">
+                                            <i class="fas fa-plus"></i> Ajouter un enseignement
+                                        </button>
+                                    </div>
+                                    
+                                    <div id="enseignements-container">
+                                        <!-- Premier enseignement par défaut -->
+                                        <div class="enseignement-item" data-index="0">
+                                            <div class="remove-btn-container">
+                                                <button type="button" class="btn btn-remove remove-enseignement">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="item-header">
+                                                <div class="item-number">1</div>
+                                                <h5 class="mb-0 text-muted">Enseignement #1</h5>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label required-field">Matière</label>
+                                                    <select class="form-select matiere-select" name="matiere_0" required>
+                                                        <option value="">Choisissez une matière...</option>
+                                                        {% for matiere in matieres %}
+                                                            <option value="{{ matiere.id }}">
+                                                                {{ matiere.nom }} ({{ matiere.code }})
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <div class="error-message matiere-error" style="display: none;"></div>
+                                                </div>
+                                                
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label required-field">Classe</label>
+                                                    <select class="form-select classe-select" name="classe_0" required>
+                                                        <option value="">Choisissez une classe...</option>
+                                                        {% for classe in classes %}
+                                                            <option value="{{ classe.id }}">
+                                                                {{ classe.nom }} - {{ classe.niveau }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <div class="error-message classe-error" style="display: none;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-custom me-3">
+                                        <i class="fas fa-save"></i>
+                                        Enregistrer les enseignements
+                                    </button>
+                                    <a href="/dashboard/" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Retour à la liste
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let enseignementCount = 1;
+
+        // Ajouter un nouvel enseignement
+        document.getElementById('add-enseignement').addEventListener('click', function() {
+            const container = document.getElementById('enseignements-container');
+            const newItem = createEnseignementItem(enseignementCount);
+            container.appendChild(newItem);
+            enseignementCount++;
+            updateItemNumbers();
+        });
+
+        // Créer un nouvel item d'enseignement
+        function createEnseignementItem(index) {
+            const div = document.createElement('div');
+            div.className = 'enseignement-item';
+            div.setAttribute('data-index', index);
+            
+            div.innerHTML = `
+                <div class="remove-btn-container">
+                    <button type="button" class="btn btn-remove remove-enseignement">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="item-header">
+                    <div class="item-number">${index + 1}</div>
+                    <h5 class="mb-0 text-muted">Enseignement #${index + 1}</h5>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field">Matière</label>
+                        <select class="form-select matiere-select" name="matiere_${index}" required>
+                            <option value="">Choisissez une matière...</option>
+                            {% for matiere in matieres %}
+                                <option value="{{ matiere.id }}">
+                                    {{ matiere.nom }} ({{ matiere.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="error-message matiere-error" style="display: none;"></div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label required-field">Classe</label>
+                        <select class="form-select classe-select" name="classe_${index}" required>
+                            <option value="">Choisissez une classe...</option>
+                            {% for classe in classes %}
+                                <option value="{{ classe.id }}">
+                                    {{ classe.nom }} - {{ classe.niveau }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="error-message classe-error" style="display: none;"></div>
+                    </div>
+                </div>
+            `;
+
+            // Ajouter l'événement de suppression
+            div.querySelector('.remove-enseignement').addEventListener('click', function() {
+                if (document.querySelectorAll('.enseignement-item').length > 1) {
+                    div.remove();
+                    updateItemNumbers();
+                }
+            });
+
+            return div;
+        }
+
+        // Mettre à jour la numérotation des items
+        function updateItemNumbers() {
+            const items = document.querySelectorAll('.enseignement-item');
+            items.forEach((item, index) => {
+                const number = item.querySelector('.item-number');
+                const title = item.querySelector('h5');
+                const matiereSelect = item.querySelector('.matiere-select');
+                const classeSelect = item.querySelector('.classe-select');
+                
+                number.textContent = index + 1;
+                title.textContent = `Enseignement #${index + 1}`;
+                
+                // Mettre à jour les noms des champs
+                matiereSelect.name = `matiere_${index}`;
+                classeSelect.name = `classe_${index}`;
+                
+                item.setAttribute('data-index', index);
+            });
+        }
+
+        // Gérer la suppression pour les items existants
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-enseignement')) {
+                const item = e.target.closest('.enseignement-item');
+                if (document.querySelectorAll('.enseignement-item').length > 1) {
+                    item.remove();
+                    updateItemNumbers();
+                }
+            }
+        });
+
+        // Validation du formulaire
+        document.getElementById('enseignantForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Vérifier l'enseignant
+            const enseignant = document.getElementById('enseignant');
+            if (!enseignant.value.trim()) {
+                document.getElementById('enseignant-error').textContent = 'Veuillez sélectionner un enseignant.';
+                document.getElementById('enseignant-error').style.display = 'block';
+                enseignant.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                document.getElementById('enseignant-error').style.display = 'none';
+                enseignant.classList.remove('is-invalid');
+            }
+
+            // Vérifier l'année scolaire
+            const annee = document.getElementById('annee_scolaire');
+            if (!annee.value.trim() || !annee.value.match(/^[0-9]{4}-[0-9]{4}$/)) {
+                document.getElementById('annee-error').textContent = 'Format requis: YYYY-YYYY (ex: 2024-2025)';
+                document.getElementById('annee-error').style.display = 'block';
+                annee.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                document.getElementById('annee-error').style.display = 'none';
+                annee.classList.remove('is-invalid');
+            }
+
+            // Vérifier chaque enseignement
+            const items = document.querySelectorAll('.enseignement-item');
+            items.forEach((item, index) => {
+                const matiereSelect = item.querySelector('.matiere-select');
+                const classeSelect = item.querySelector('.classe-select');
+                const matiereError = item.querySelector('.matiere-error');
+                const classeError = item.querySelector('.classe-error');
+
+                // Vérifier la matière
+                if (!matiereSelect.value.trim()) {
+                    matiereError.textContent = 'Veuillez sélectionner une matière.';
+                    matiereError.style.display = 'block';
+                    matiereSelect.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    matiereError.style.display = 'none';
+                    matiereSelect.classList.remove('is-invalid');
+                }
+
+                // Vérifier la classe
+                if (!classeSelect.value.trim()) {
+                    classeError.textContent = 'Veuillez sélectionner une classe.';
+                    classeError.style.display = 'block';
+                    classeSelect.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    classeError.style.display = 'none';
+                    classeSelect.classList.remove('is-invalid');
+                }
+            });
+
+            // Vérifier les doublons
+            const combinations = [];
+            items.forEach(item => {
+                const matiere = item.querySelector('.matiere-select').value;
+                const classe = item.querySelector('.classe-select').value;
+                
+                if (matiere && classe) {
+                    const combo = `${matiere}-${classe}`;
+                    if (combinations.includes(combo)) {
+                        alert('Erreur: Vous ne pouvez pas assigner la même matière à la même classe plusieurs fois.');
+                        isValid = false;
+                        return;
+                    }
+                    combinations.push(combo);
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                // Scroll vers le premier champ en erreur
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        });
+
+        // Validation en temps réel
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('form-control') || e.target.classList.contains('form-select')) {
+                e.target.classList.remove('is-invalid');
+                const errorDiv = e.target.parentNode.querySelector('.error-message');
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

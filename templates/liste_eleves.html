@@ -10,7 +10,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #5200a3 100%);
             color: white;
             padding: 40px 0;
             margin-bottom: 30px;
@@ -136,11 +136,13 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
+                    
                     <h1><i class="fas fa-users"></i> {{ title }}</h1>
                     <p class="mb-0">Gestion et suivi des élèves inscrits</p>
                 </div>
+                
                 <div class="col-md-4 text-md-end">
-                    <a href="{% url 'inscription_eleve' %}" class="btn btn-light btn-lg">
+                    <a href="{% url 'gestionAbst:inscription_eleve' %}" class="btn btn-light btn-lg">
                         <i class="fas fa-user-plus"></i> Nouvel élève
                     </a>
                 </div>
@@ -301,12 +303,12 @@
                                     </td>
                                     <td>
                                         <div class="d-flex flex-wrap">
-                                            <a href="{% url 'detail_eleve' eleve.id %}" 
+                                            <a href="{% url 'gestionAbst:detail_eleve' eleve.id %}" 
                                                class="btn-action btn btn-info btn-sm" 
                                                title="Voir détails">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{% url 'modifier_eleve' eleve.id %}" 
+                                            <a href="{% url 'gestionAbst:modifier_eleve' eleve.id %}" 
                                                class="btn-action btn btn-warning btn-sm" 
                                                title="Modifier">
                                                 <i class="fas fa-edit"></i>
@@ -331,10 +333,10 @@
                     <p>
                         {% if request.GET.search or classe_selectionnee or statut_selectionne %}
                             Aucun élève ne correspond aux critères de recherche.
-                            <br><a href="{% url 'liste_eleves' %}" class="btn btn-link">Réinitialiser les filtres</a>
+                            <br><a href="{% url 'gestionAbst:liste_eleves' %}" class="btn btn-link">Réinitialiser les filtres</a>
                         {% else %}
                             Commencez par inscrire votre premier élève.
-                            <br><a href="{% url 'inscription_eleve' %}" class="btn btn-primary mt-3">
+                            <br><a href="{% url 'gestionAbst:inscription_eleve' %}" class="btn btn-primary mt-3">
                                 <i class="fas fa-plus"></i> Inscrire un élève
                             </a>
                         {% endif %}
@@ -413,8 +415,7 @@
         // Fonction pour confirmer la suppression
         function confirmerSuppression(eleveId, eleveNom) {
             document.getElementById('eleveNom').textContent = eleveNom;
-            document.getElementById('deleteForm').action = `/eleves/supprimer/${eleveId}/`;
-            
+            document.getElementById('deleteForm').action = "{% url 'gestionAbst:supprimer_eleve' 0 %}".replace('0', eleveId);;
             const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
             modal.show();
         }
@@ -440,12 +441,12 @@
             // Ctrl/Cmd + N pour nouveau élève
             if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
                 e.preventDefault();
-                window.location.href = "{% url 'inscription_eleve' %}";
+                window.location.href = "{% url 'gestionAbst:inscription_eleve' %}";
             }
             
             // Escape pour réinitialiser les filtres
             if (e.key === 'Escape') {
-                window.location.href = "{% url 'liste_eleves' %}";
+                window.location.href = "{% url 'gestionAbst:liste_eleves' %}";
             }
         });
     </script>

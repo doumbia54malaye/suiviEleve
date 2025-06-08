@@ -301,11 +301,11 @@ function escapeHtml(unsafe) {
                   <i class="fa-solid fa-user-plus"></i>
                   <span>Ajouter un élève</span>
                 </a>
-                <a href="/admin/gestion/customuser/add/?user_type=teacher" class="quick-action-btn">
+                <a href="#" class="quick-action-btn">
                   <i class="fa-solid fa-user-plus"></i>
                   <span>Ajouter un enseignant</span>
                 </a>
-                 <a href="/admin/gestion/customuser/add/" class="quick-action-btn">
+                 <a href="/compteUser/" class="quick-action-btn">
                   <i class="fa-solid fa-users-cog"></i>
                   <span>Gérer Utilisateurs</span>
                 </a>
@@ -313,7 +313,7 @@ function escapeHtml(unsafe) {
                   <i class="fa-solid fa-plus"></i>
                   <span>Créer une classe</span>
                 </a>
-                <a href="/admin/gestion/enseignement/" class="quick-action-btn"> <!-- Lien vers la liste des enseignements -->
+                <a href="/inscription_enseignant/" class="quick-action-btn"> <!-- Lien vers la liste des enseignements -->
                   <i class="fa-solid fa-calendar-plus"></i>
                   <span>Gérer enseignements</span>
                 </a>

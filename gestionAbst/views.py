@@ -3,14 +3,24 @@ from django.http import JsonResponse, HttpResponse # Assurez-vous que HttpRespon
 from django.contrib.auth import authenticate, login, logout # Assurez-vous que logout est importé
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
-import json
-from django.contrib.auth.decorators import login_required, login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils import timezone # Pour filtrer les absences du jourfrom django.contrib.auth import authenticate, login
-from .models import *
-from .forms import EleveForm
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.db import transaction
+from .models import *
+from .forms import *
+import json
+import re
+from django.db.models import Q
+
+
+
 
 def index(request):
    
@@ -18,7 +28,10 @@ def index(request):
 
 def students(request):
     return render(request, 'students.html')
-
+def compte_utilisateur(request):
+    return render(request, 'compteUser.html')
+def detail(request):
+    return render(request, 'detail.html')
 @login_required
 def dashboard_view(request):
     eleves = Eleve.objects.all()
@@ -45,6 +58,19 @@ def seance_create(request):
 def seance_detail(request, pk):
     # Logique pour afficher le détail d'une séance
     return HttpResponse(f"Page de détail de la séance {pk} (à implémenter)")
+def detail_enseignant(request):
+    # Logique pour afficher le détail d'une séance
+    return HttpResponse(f"page de detail enseignant  (à implémenter)")
+def vue_detail_enseignement(request, enseignement_id):
+    # On récupère l'objet enseignement correspondant à l'ID, ou une erreur 404 s'il n'existe pas
+    enseignement = get_object_or_404(Enseignement, pk=enseignement_id)
+    
+    # Pour l'instant, on retourne juste une réponse simple. 
+    # Plus tard, vous rendrez un vrai template ici.
+    return HttpResponse(f"<h1>Détails pour l'enseignement ID: {enseignement.id}</h1>"
+                        f"<p>Enseignant: {enseignement.enseignant}</p>"
+                        f"<p>Matière: {enseignement.matiere}</p>"
+                        f"<p>Classe: {enseignement.classe}</p>")
 
 def faire_appel(request, pk):
     # Logique pour faire l'appel pour une séance
@@ -137,7 +163,7 @@ def logout_api(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('index') 
+    return redirect('gestionAbst:index')
 @require_http_methods(["GET"])
 def check_auth(request):
     """Vérifier si l'utilisateur est connecté"""
@@ -314,11 +340,58 @@ def modifier_eleve(request, eleve_id):
     }
     return render(request, 'inscriptions.html', context)
 
+
 def liste_eleves(request):
-    """Vue pour afficher la liste des élèves"""
-    eleves = Eleve.objects.select_related('classe').all()
-    
-    eleves = Eleve.objects.select_related('classe').all()
+    """
+    Vue pour afficher la liste des élèves avec des filtres
+    de recherche, de classe et de statut.
+    """
+    # 1. On commence par récupérer tous les élèves.
+    eleves = Eleve.objects.select_related('classe').order_by('-created_at')
+
+    # 2. On récupère les valeurs des filtres depuis l'URL (via la méthode GET).
+    search_query = request.GET.get('search', '')
+    classe_selectionnee = request.GET.get('classe', '')
+    statut_selectionne = request.GET.get('statut', '')
+
+    # 3. On applique les filtres s'ils existent.
+    if search_query:
+        # On recherche dans le nom, le prénom et le matricule.
+        # L'objet Q permet de faire une recherche avec un "OU" logique.
+        eleves = eleves.filter(
+            Q(nom__icontains=search_query) | 
+            Q(prenoms__icontains=search_query) | 
+            Q(matricule__icontains=search_query)
+        )
+
+    if classe_selectionnee:
+        # On filtre par l'ID de la classe.
+        eleves = eleves.filter(classe__id=classe_selectionnee)
+
+    if statut_selectionne:
+        # On filtre par le statut "actif" ou "inactif".
+        if statut_selectionne == 'actif':
+            eleves = eleves.filter(actif=True)
+        elif statut_selectionne == 'inactif':
+            eleves = eleves.filter(actif=False)
+
+    # 4. On récupère toutes les classes pour le menu déroulant du filtre.
+    classes = Classe.objects.all()
+
+    # 5. On prépare le contexte à envoyer au template.
+    context = {
+        'title': 'Gestion des Élèves',
+        'eleves': eleves,
+        'classes': classes,
+        # On renvoie les valeurs des filtres au template pour qu'il puisse
+        # pré-remplir les champs du formulaire.
+        'classe_selectionnee': classe_selectionnee,
+        'statut_selectionne': statut_selectionne,
+    }
+
+    # 6. On rend le template avec le contexte.
+    # Assurez-vous que votre fichier template s'appelle bien 'liste_eleves.html'
+    return render(request, 'liste_eleves.html', context)
     
     # Recherche textuelle
     # Recherche textuelle
@@ -385,3 +458,307 @@ def verifier_matricule(request):
         return JsonResponse({'existe': existe})
     
     return JsonResponse({'existe': False})
+
+#vue pour l'inscription d'un enseignant
+
+def inscription_enseignant(request):
+    if request.method == 'POST':
+        enseignant_id = request.POST.get('enseignant')
+        annee_scolaire = request.POST.get('annee_scolaire')
+        
+        try:
+            enseignant = CustomUser.objects.get(id=enseignant_id, user_type='teacher')
+            
+            # Récupérer tous les enseignements
+            enseignements_crees = []
+            index = 0
+            
+            while f'matiere_{index}' in request.POST:
+                matiere_id = request.POST.get(f'matiere_{index}')
+                classe_id = request.POST.get(f'classe_{index}')
+                
+                if matiere_id and classe_id:
+                    enseignement, created = Enseignement.objects.get_or_create(
+                        enseignant=enseignant,
+                        matiere_id=matiere_id,
+                        classe_id=classe_id,
+                        annee_scolaire=annee_scolaire
+                    )
+                    if created:
+                        enseignements_crees.append(enseignement)
+                
+                index += 1
+            
+            if enseignements_crees:
+                messages.success(request, f'{len(enseignements_crees)} enseignement(s) créé(s) avec succès.')
+                return redirect('gestionAbst:liste_enseignements')
+            else:
+                messages.warning(request, 'Aucun nouvel enseignement créé.')
+                
+        except Exception as e:
+            messages.error(request, f'Erreur lors de la création : {str(e)}')
+    
+    context = {
+        'title': 'Inscription d\'un enseignant',
+        'enseignants': CustomUser.objects.filter(user_type='teacher', is_active=True),
+        'matieres': Matiere.objects.all().order_by('nom'),
+        'classes': Classe.objects.all().order_by('niveau', 'nom'),
+    }
+    
+    return render(request, 'inscription_enseignant.html', context)
+def vue_liste_enseignements(request):
+
+    # --- 1. Récupérer les données de la base de données ---
+
+    # Récupérer tous les enseignements. 
+    # Le .select_related() est une optimisation pour éviter trop de requêtes SQL.
+    enseignements = Enseignement.objects.select_related(
+        'enseignant', 'matiere', 'classe'
+    ).all()
+
+    # Calculer les statistiques
+    total_enseignements = enseignements.count()
+    total_enseignants = CustomUser.objects.filter(user_type='teacher', is_active=True).count()
+    total_matieres = Matiere.objects.count()
+    total_classes = Classe.objects.count()
+    
+    # --- 2. Préparer le contexte pour le template ---
+    context = {
+        'title': "Liste des Enseignements",  # Votre variable titre (j'ai changé le nom pour correspondre au template)
+
+        # Les données pour le tableau
+        'enseignements': enseignements,
+
+        # Les données pour les cartes de statistiques
+        'total_enseignements': total_enseignements,
+        'total_enseignants': total_enseignants,
+        'total_matieres': total_matieres,
+        'total_classes': total_classes,
+
+        # Vous devrez aussi passer les années scolaires si vous utilisez le filtre
+        'annees_scolaires': Enseignement.objects.values_list('annee_scolaire', flat=True).distinct().order_by('-annee_scolaire')
+    }
+    
+    # --- 3. Rendre le template avec le contexte complet ---
+    return render(request, 'liste_enseignants.html', context)
+def vue_seances_enseignement(request, enseignement_id):
+    enseignement = get_object_or_404(Enseignement, pk=enseignement_id)
+    
+    # Plus tard, vous afficherez la liste des séances pour cet enseignement
+    return HttpResponse(f"<h1>Gestion des séances pour l'enseignement :</h1>"
+                        f"<p>{enseignement.matiere} en classe {enseignement.classe}</p>")
+
+def modifier_enseignement(request, enseignement_id):
+    return HttpResponse(f"Page de modification de l'enseignement {enseignement_id} (à implémenter)"),
+
+def supprimer_enseignant(request, enseignant_id):
+    """Vue pour supprimer un enseignant"""
+    enseignant = get_object_or_404(CustomUser, id=enseignant_id, user_type='teacher')
+    nom_complet = f"{enseignant.first_name} {enseignant.last_name}"
+    
+    enseignant.delete()
+    messages.success(request, f"L'enseignant {nom_complet} a été supprimé avec succès.")
+    
+    return redirect('gestionAbst:liste_enseignements')
+
+def export_enseignements(request):
+    # Exemple simple pour exporter en CSV
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="enseignements.csv"'
+def is_admin(user):
+    """Vérifier si l'utilisateur est admin"""
+    return user.is_authenticated and (user.is_superuser or user.user_type == 'admin')
+def is_admin(user):
+    """Vérifier si l'utilisateur est admin"""
+    return user.is_authenticated and (user.is_superuser or user.user_type == 'admin')
+
+@login_required
+@user_passes_test(is_admin)
+def inscription_utilisateur(request):
+    """Vue principale pour l'inscription d'un utilisateur"""
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    user = form.save(commit=False)
+                    # Ajout des champs manuellement si nécessaire
+                    user.is_active = form.cleaned_data.get('is_active', True)
+                    user.is_staff = form.cleaned_data.get('is_staff', False)
+                    user.save()  # Sauvegarde finale
+                    
+                    # Debug - afficher les données
+                    print("Utilisateur créé avec les données suivantes:")
+                    print(f"Username: {user.username}")
+                    print(f"Email: {user.email}")
+                    print(f"Type: {user.user_type}")
+                    print(f"Staff: {user.is_staff}")
+                    print(f"Active: {user.is_active}")
+                    
+                    messages.success(request, f'Compte créé avec succès pour {user.get_full_name()}')
+                    return redirect('liste_utilisateurs')  # Redirection en cas de succès
+                    
+            except Exception as e:
+                print(f"Erreur lors de la création: {str(e)}")
+                messages.error(request, f'Une erreur est survenue: {str(e)}')
+        else:
+            # Afficher toutes les erreurs de validation
+            print("Erreurs de formulaire:")
+            for field, errors in form.errors.items():
+                print(f"{field}: {errors}")
+                for error in errors:
+                    messages.error(request, f"{form.fields[field].label}: {error}")
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'registration/inscription.html', {'form': form})
+# Vues AJAX pour validation en temps réel
+def verifier_username(request):
+    """Vérifier si un nom d'utilisateur existe déjà"""
+    username = request.GET.get('username', '').strip()
+    
+    if not username:
+        return JsonResponse({'existe': False})
+    
+    existe = CustomUser.objects.filter(username=username).exists()
+    return JsonResponse({'existe': existe})
+
+def verifier_email(request):
+    """Vérifier si une adresse email existe déjà"""
+    email = request.GET.get('email', '').strip()
+    
+    if not email:
+        return JsonResponse({'existe': False})
+    
+    # Valider le format email
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({'existe': False, 'format_invalide': True})
+    
+    existe = CustomUser.objects.filter(email=email).exists()
+    return JsonResponse({'existe': existe})
+
+@login_required
+@user_passes_test(is_admin)
+def liste_utilisateurs(request):
+    """Vue pour afficher la liste des utilisateurs"""
+    utilisateurs = CustomUser.objects.all().order_by('-created_at')
+    
+    # Filtrage par type d'utilisateur
+    user_type = request.GET.get('type')
+    if user_type and user_type in ['admin', 'teacher', 'parent']:
+        utilisateurs = utilisateurs.filter(user_type=user_type)
+    
+    # Recherche
+    search = request.GET.get('search')
+    if search:
+        utilisateurs = utilisateurs.filter(
+            models.Q(username__icontains=search) |
+            models.Q(first_name__icontains=search) |
+            models.Q(last_name__icontains=search) |
+            models.Q(email__icontains=search)
+        )
+    
+    context = {
+        'utilisateurs': utilisateurs,
+        'user_type_filter': user_type,
+        'search_query': search,
+    }
+    
+    return render(request, 'users/liste_utilisateurs.html', context)
+    """Vue pour afficher la liste des utilisateurs"""
+    utilisateurs = CustomUser.objects.all().order_by('-created_at')
+    
+    # Filtrage par type d'utilisateur
+    user_type = request.GET.get('type')
+    if user_type and user_type in ['admin', 'teacher', 'parent']:
+        utilisateurs = utilisateurs.filter(user_type=user_type)
+    
+    # Recherche
+    search = request.GET.get('search')
+    if search:
+        utilisateurs = utilisateurs.filter(
+            models.Q(username__icontains=search) |
+            models.Q(first_name__icontains=search) |
+            models.Q(last_name__icontains=search) |
+            models.Q(email__icontains=search)
+        )
+    
+    context = {
+        'utilisateurs': utilisateurs,
+        'user_type_filter': user_type,
+        'search_query': search,
+    }
+    
+    return render(request, 'users/liste_utilisateurs.html', context)
+@login_required
+@user_passes_test(is_admin)
+def modifier_utilisateur(request, user_id):
+    """Vue pour modifier un utilisateur existant"""
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Utilisateur introuvable.')
+        return redirect('liste_utilisateurs')
+    
+    if request.method == 'POST':
+        # Formulaire de modification (similaire au formulaire de création)
+        form = CustomUserCreationForm(request.POST, instance=user)
+        
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    form.save()
+                    messages.success(request, f'Utilisateur {user.username} modifié avec succès.')
+                    return redirect('liste_utilisateurs')
+            except Exception as e:
+                messages.error(request, f'Erreur lors de la modification: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{field}: {error}')
+    else:
+        form = CustomUserCreationForm(instance=user)
+    
+    return render(request, 'users/modifier_utilisateur.html', {
+        'form': form,
+        'user_to_modify': user
+    })
+
+@login_required
+@user_passes_test(is_admin)
+def supprimer_utilisateur(request, user_id):
+    """Vue pour supprimer un utilisateur"""
+    try:
+        user = CustomUser.objects.get(id=user_id)
+    except CustomUser.DoesNotExist:
+        messages.error(request, 'Utilisateur introuvable.')
+        return redirect('liste_utilisateurs')
+    
+    if request.method == 'POST':
+        username = user.username
+        user.delete()
+        messages.success(request, f'Utilisateur {username} supprimé avec succès.')
+        return redirect('liste_utilisateurs')
+    
+    return render(request, 'users/confirmer_suppression.html', {'user_to_delete': user})
+# Vue pour les statistiques (bonus)
+@login_required
+@user_passes_test(is_admin)
+def statistiques_utilisateurs(request):
+    """Vue pour afficher les statistiques des utilisateurs"""
+    from django.db.models import Count
+    
+    stats = {
+        'total_users': CustomUser.objects.count(),
+        'active_users': CustomUser.objects.filter(is_active=True).count(),
+        'inactive_users': CustomUser.objects.filter(is_active=False).count(),
+        'by_type': CustomUser.objects.values('user_type').annotate(count=Count('id')),
+        'recent_users': CustomUser.objects.filter(
+            created_at__gte=timezone.now() - timedelta(days=30)
+        ).count(),
+    }
+    
+    return render(request, 'users/statistiques.html', {'stats': stats})

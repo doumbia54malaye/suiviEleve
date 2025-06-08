@@ -1,6 +1,6 @@
 
 :root {
-  --primary: #0848aa;
+  --primary: #3498db;
   --primary-light: #0d70c6;
   --primary-dark: #0f5fd8;
   --secondary: #30b673;
@@ -12,7 +12,7 @@
   --success: #198754;
   --warning: #fd7e14;
   --dark: #212529;
-  --light: #f8f9fa;
+  --light: #ffffff;
   --gray: #6c757d;
   --gray-light: #adb5bd;
   --gray-dark: #343a40;
@@ -127,6 +127,16 @@ body {
 
 .card-body {
   padding: 1.5rem;
+  color: var(--primary-);      
+  border-bottom: 2px solid var(--primary); 
+  border-left: 2px solid var(--primary);    
+}
+.card-body:hover {
+  padding: 1.5rem;
+  color: var(--white);
+  background-color: var(--primary);
+  border-bottom: 2px solid var(--primary); 
+  border-left: 2px solid var(--primary);
 }
 
 .card-footer {
@@ -342,11 +352,14 @@ input:focus, select:focus {
   display: flex;
   align-items: center;
   padding: 0.75rem 1rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 1);
   text-decoration: none;
   transition: var(--transition);
+  border-bottom: 1px solid var(--light);
 }
-
+h2,h1{
+  color:rgb(11, 11, 143)
+}
 .sidebar-link:hover, .sidebar-link.active {
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--white);
@@ -383,7 +396,7 @@ input:focus, select:focus {
 /* Navbar */
 .top-navbar {
   height: var(--header-height);
-  background-color: var(--white);
+  background-color: var(--primary);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -505,8 +518,8 @@ input:focus, select:focus {
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  background-color: var(--primary);
-  color: var(--white);
+  background-color: var(--white);
+  color: var(--primary);
   border-radius: 50%;
   font-weight: 600;
   font-size: 0.875rem;
@@ -521,12 +534,13 @@ input:focus, select:focus {
   display: block;
   font-size: 0.875rem;
   font-weight: 600;
+  color: var(--light);
 }
 
 .user-role {
   display: block;
   font-size: 0.75rem;
-  color: var(--gray);
+  color: var(--light);
 }
 
 .user-dropdown {
@@ -581,8 +595,10 @@ input:focus, select:focus {
 }
 
 .page-header h1 {
-  font-size: 1.75rem;
+  font-size:2rem;
   font-weight: 700;
+  color:rgb(11, 11, 143);
+  font-family: 'Times New Roman', Times, serif;
 }
 
 /* Toast Messages */

@@ -257,7 +257,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
-                        <a href="{% url 'liste_eleves' %}">
+                        <a href="{% url 'gestionAbst:liste_eleves' %}">Retour à la liste</a>
                             <i class="fas fa-users me-1"></i>Liste des élèves
                         </a>
                     </li>
@@ -311,21 +311,48 @@
                         <span class="info-value">
                             {{ eleve.date_naissance|date:"l d F Y" }}
                             <small class="text-muted ms-2">
-                                ({{ eleve.date_naissance|timesince }} ans)
+                                ({{ eleve.age_detaille }})
                             </small>
                         </span>
                     </div>
-                    
+                
                     <div class="info-row">
                         <span class="info-label">
                             <i class="fas fa-school"></i>
                             Classe
                         </span>
                         <span class="info-value">
-                            <span class="badge bg-primary fs-6">{{ eleve.classe }}</span>
+                            <span class="badge bg-primary fs-6">{{ eleve.classe.nom }}</span>
                         </span>
+                    </div> 
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-calendar-plus"></i>
+                            Date d'inscription
+                        </span>
+                        <span class="info-value">{{ eleve.created_at|date:"d/m/Y à H:i" }}</span>
                     </div>
-                    
+
+                        {% if eleve.updated_at != eleve.created_at %}
+                    <div class="info-row">
+                        <span class="info-label">
+                            <i class="fas fa-edit"></i>
+                            Dernière modification
+                        </span>
+                        <span class="info-value">{{ eleve.updated_at|date:"d/m/Y à H:i" }}</span>
+                    </div>
+                        {% endif %}
+
+                    <!-- Le bloc suivant est un exemple de ce que vous vouliez peut-être faire -->
+                    <a href="#" class="btn-custom {% if eleve.actif %}btn-warning-custom{% else %}btn-success-custom{% endif %}">
+                        <i class="fas fa-{% if eleve.actif %}pause{% else %}play{% endif %}"></i>
+                        {% if eleve.actif %}
+                            Désactiver
+                        {% else %}
+                            Activer
+                        {% endif %}
+                        l'élève
+                    </a>
                     <div class="info-row">
                         <span class="info-label">
                             <i class="fas fa-toggle-on"></i>
@@ -416,9 +443,9 @@
                             <i class="fas fa-phone me-2"></i>Appeler parent
                         </a>
                         {% if eleve.email_parent %}
-                            <a href="mailto:{{ eleve.email_parent }}" class="btn btn-outline-info btn-sm">
-                                <i class="fas fa-envelope me-2"></i>Envoyer email
-                            </a>
+                        <a href="mailto:{{ eleve.email_parent }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-envelope me-2"></i>Envoyer email
+                        </a>
                         {% endif %}
                     </div>
                 </div>
@@ -463,7 +490,7 @@
 
         <!-- Boutons d'action -->
         <div class="action-buttons">
-            <a href="{% url 'modifier_eleve' eleve.id %}" class="btn-custom btn-warning-custom">
+            <a href="{% url 'gestionAbst:modifier_eleve' eleve.id %}" class="btn-custom btn-warning-custom">
                 <i class="fas fa-edit"></i>
                 Modifier les informations
             </a>
@@ -474,7 +501,7 @@
                 Supprimer l'élève
             </button>
             
-            <a href="{% url 'liste_eleves' %}" class="btn-custom btn-secondary-custom">
+            <a href="{% url 'gestionAbst:liste_eleves' %}" class="btn-custom btn-secondary-custom">
                 <i class="fas fa-arrow-left"></i>
                 Retour à la liste
             </a>
@@ -541,14 +568,14 @@
                 const target = e.target;
                 if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
                     e.preventDefault();
-                    window.location.href = "{% url 'modifier_eleve' eleve.id %}";
+                    window.location.href = "{% url 'gestionAbst:modifier_eleve' eleve.id %}";
                 }
             }
             
             // Escape ou B pour retour
             if (e.key === 'Escape' || e.key === 'b') {
                 if (!document.querySelector('.modal.show')) {
-                    window.location.href = "{% url 'liste_eleves' %}";
+                    window.location.href = "{% url 'gestionAbst:liste_eleves' %}";
                 }
             }
             
@@ -575,6 +602,40 @@
                 }, index * 100);
             });
         });
+        // Validation de l'âge en temps réel
+document.getElementById('id_date_naissance').addEventListener('change', function() {
+    const dateNaissance = new Date(this.value);
+    const aujourd = new Date();
+    
+    if (dateNaissance > aujourd) {
+        this.setCustomValidity('La date de naissance ne peut pas être dans le futur.');
+        return;
+    }
+    
+    const age = aujourd.getFullYear() - dateNaissance.getFullYear();
+    const monthDiff = aujourd.getMonth() - dateNaissance.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && aujourd.getDate() < dateNaissance.getDate())) {
+        age--;
+    }
+    
+    if (age < 2) {
+        this.setCustomValidity('L\'élève doit avoir au moins 2 ans.');
+    } else if (age > 30) {
+        this.setCustomValidity('L\'élève ne peut pas avoir plus de 30 ans.');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+// Auto-génération du matricule si pas fourni
+document.getElementById('eleveForm').addEventListener('submit', function(e) {
+    const matriculeField = document.getElementById('id_matricule');
+    if (!matriculeField.value.trim()) {
+        // Le matricule sera généré automatiquement par le modèle
+        matriculeField.value = '';
+    }
+});
 
         // Style d'impression
         const printStyles = `

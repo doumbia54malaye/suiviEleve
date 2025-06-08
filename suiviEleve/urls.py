@@ -6,7 +6,6 @@ from gestionAbst import views as gestion_abst_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(('gestionAbst.urls','gestionAbst'), namespace='gestionAbst')),
-   path('', gestion_abst_views.index, name='index'),
-]
 
+    path('', include('gestionAbst.urls')), 
+]
