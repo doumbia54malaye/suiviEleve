@@ -1,0 +1,26 @@
+{% block content %} <!-- Si vous avez un système de blocks, sinon retirez cette ligne -->
+<div class="container mt-5">
+    <h1><i class="fas fa-user-circle"></i> {{ title }}</h1>
+    <hr>
+    
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Nom d'utilisateur :</strong> {{ user_details.username }}</p>
+            <p><strong>Nom complet :</strong> {{ user_details.get_full_name }}</p>
+            <p><strong>Email :</strong> {{ user_details.email }}</p>
+            <p><strong>Type de compte :</strong> {{ user_details.get_user_type_display }}</p>
+            <p><strong>Statut :</strong> {% if user_details.is_active %}Actif{% else %}Inactif{% endif %}</p>
+            <p><strong>Date d'inscription :</strong> {{ user_details.date_joined|date:"d F Y H:i" }}</p>
+            <p><strong>Dernière connexion :</strong> {{ user_details.last_login|date:"d F Y H:i" }}</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'gestionAbst:liste_utilisateurs' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{% url 'gestionAbst:modifier_utilisateur' user_details.id %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} <!-- Fin du block -->

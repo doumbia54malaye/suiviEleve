@@ -32,12 +32,14 @@ urlpatterns = [
     path('supprimer_enseignant/<int:enseignant_id>/', views.supprimer_enseignant, name='supprimer_enseignant'),
     path('enseignements/<int:enseignement_id>/seances/', views.vue_seances_enseignement, name='seances_enseignement'),
         # Gestion des utilisateurs
-    path('inscription/', views.inscription_utilisateur, name='inscription_utilisateur'),
-    path('utilisateurs/', views.liste_utilisateurs, name='liste_utilisateurs'),
+    path('compteUser/', views.inscription_utilisateur, name='inscription_utilisateur'),
+    path('liste_utilisateurs/', views.liste_utilisateurs, name='liste_utilisateurs'),
     path('utilisateurs/<int:user_id>/modifier/', views.modifier_utilisateur, name='modifier_utilisateur'),
     path('utilisateurs/<int:user_id>/supprimer/', views.supprimer_utilisateur, name='supprimer_utilisateur'),
     path('statistiques/', views.statistiques_utilisateurs, name='statistiques_utilisateurs'),
-    
+    path('utilisateurs/<int:user_id>/activer/', views.activer_utilisateur, name='activer_utilisateur'),
+    path('utilisateurs/<int:user_id>/desactiver/', views.desactiver_utilisateur, name='desactiver_utilisateur'),
+    path('utilisateurs/<int:user_id>/', views.detail_utilisateur, name='detail_utilisateur'),
     # API endpoints pour validation AJAX
     path('verifier-username/', views.verifier_username, name='verifier_username'),
     path('verifier-email/', views.verifier_email, name='verifier_email'),

@@ -301,11 +301,7 @@ function escapeHtml(unsafe) {
                   <i class="fa-solid fa-user-plus"></i>
                   <span>Ajouter un élève</span>
                 </a>
-                <a href="#" class="quick-action-btn">
-                  <i class="fa-solid fa-user-plus"></i>
-                  <span>Ajouter un enseignant</span>
-                </a>
-                 <a href="/compteUser/" class="quick-action-btn">
+                 <a href="/liste_utilisateurs/" class="quick-action-btn">
                   <i class="fa-solid fa-users-cog"></i>
                   <span>Gérer Utilisateurs</span>
                 </a>

@@ -597,7 +597,7 @@ def inscription_utilisateur(request):
                     print(f"Active: {user.is_active}")
                     
                     messages.success(request, f'Compte créé avec succès pour {user.get_full_name()}')
-                    return redirect('liste_utilisateurs')  # Redirection en cas de succès
+                    return redirect('gestionAbst:liste_utilisateurs')  # Redirection en cas de succès
                     
             except Exception as e:
                 print(f"Erreur lors de la création: {str(e)}")
@@ -612,7 +612,7 @@ def inscription_utilisateur(request):
     else:
         form = CustomUserCreationForm()
     
-    return render(request, 'registration/inscription.html', {'form': form})
+    return render(request, 'inscription_enseignant.html', {'form': form})
 # Vues AJAX pour validation en temps réel
 def verifier_username(request):
     """Vérifier si un nom d'utilisateur existe déjà"""
@@ -642,57 +642,60 @@ def verifier_email(request):
 
 @login_required
 @user_passes_test(is_admin)
+# Assurez-vous que la fonction is_admin est bien définie
 def liste_utilisateurs(request):
-    """Vue pour afficher la liste des utilisateurs"""
-    utilisateurs = CustomUser.objects.all().order_by('-created_at')
-    
-    # Filtrage par type d'utilisateur
-    user_type = request.GET.get('type')
-    if user_type and user_type in ['admin', 'teacher', 'parent']:
-        utilisateurs = utilisateurs.filter(user_type=user_type)
-    
-    # Recherche
-    search = request.GET.get('search')
-    if search:
-        utilisateurs = utilisateurs.filter(
-            models.Q(username__icontains=search) |
-            models.Q(first_name__icontains=search) |
-            models.Q(last_name__icontains=search) |
-            models.Q(email__icontains=search)
+    """
+    Vue complète pour afficher et filtrer la liste des utilisateurs.
+    """
+    # 1. On commence avec tous les utilisateurs
+    users_qs = CustomUser.objects.all().order_by('last_name', 'first_name')
+
+    # 2. On calcule les statistiques AVANT de filtrer la liste principale
+    total_users = users_qs.count()
+    admins_count = users_qs.filter(user_type='admin').count()
+    teachers_count = users_qs.filter(user_type='teacher').count()
+    parents_count = users_qs.filter(user_type='parent').count()
+
+    # 3. On récupère les valeurs des filtres depuis l'URL (avec les bons noms)
+    search_query = request.GET.get('search', '')
+    user_type_selectionne = request.GET.get('user_type', '')
+    statut_selectionne = request.GET.get('statut', '')
+
+    # 4. On applique les filtres sur le queryset
+    if search_query:
+        users_qs = users_qs.filter(
+            Q(username__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query)
         )
-    
+
+    if user_type_selectionne:
+        users_qs = users_qs.filter(user_type=user_type_selectionne)
+
+    if statut_selectionne:
+        if statut_selectionne == 'actif':
+            users_qs = users_qs.filter(is_active=True)
+        elif statut_selectionne == 'inactif':
+            users_qs = users_qs.filter(is_active=False)
+
+    # 5. On prépare le contexte avec les BONS noms de variables
     context = {
-        'utilisateurs': utilisateurs,
-        'user_type_filter': user_type,
-        'search_query': search,
+        'title': 'Gestion des Utilisateurs',
+        'users': users_qs,  # La variable s'appelle 'users', comme dans le template
+        'total_users': total_users,
+        'admins_count': admins_count,
+        'teachers_count': teachers_count,
+        'parents_count': parents_count,
+        'user_type_selectionne': user_type_selectionne, # On renvoie les filtres
+        'statut_selectionne': statut_selectionne,
     }
-    
-    return render(request, 'users/liste_utilisateurs.html', context)
-    """Vue pour afficher la liste des utilisateurs"""
-    utilisateurs = CustomUser.objects.all().order_by('-created_at')
-    
-    # Filtrage par type d'utilisateur
-    user_type = request.GET.get('type')
-    if user_type and user_type in ['admin', 'teacher', 'parent']:
-        utilisateurs = utilisateurs.filter(user_type=user_type)
-    
-    # Recherche
-    search = request.GET.get('search')
-    if search:
-        utilisateurs = utilisateurs.filter(
-            models.Q(username__icontains=search) |
-            models.Q(first_name__icontains=search) |
-            models.Q(last_name__icontains=search) |
-            models.Q(email__icontains=search)
-        )
-    
-    context = {
-        'utilisateurs': utilisateurs,
-        'user_type_filter': user_type,
-        'search_query': search,
-    }
-    
-    return render(request, 'users/liste_utilisateurs.html', context)
+
+    # 6. On rend le template. 
+    # Assurez-vous que le chemin est correct. Si votre template est dans
+    # templates/users/liste_utilisateurs.html, c'est bon. Sinon, ajustez-le.
+    return render(request, 'liste_utilisateurs.html', context)
+
 @login_required
 @user_passes_test(is_admin)
 def modifier_utilisateur(request, user_id):
@@ -701,7 +704,7 @@ def modifier_utilisateur(request, user_id):
         user = CustomUser.objects.get(id=user_id)
     except CustomUser.DoesNotExist:
         messages.error(request, 'Utilisateur introuvable.')
-        return redirect('liste_utilisateurs')
+        return redirect('gestionAbst:liste_utilisateurs')
     
     if request.method == 'POST':
         # Formulaire de modification (similaire au formulaire de création)
@@ -712,7 +715,7 @@ def modifier_utilisateur(request, user_id):
                 with transaction.atomic():
                     form.save()
                     messages.success(request, f'Utilisateur {user.username} modifié avec succès.')
-                    return redirect('liste_utilisateurs')
+                    return redirect('gestionAbst:liste_utilisateurs')
             except Exception as e:
                 messages.error(request, f'Erreur lors de la modification: {str(e)}')
         else:
@@ -722,7 +725,7 @@ def modifier_utilisateur(request, user_id):
     else:
         form = CustomUserCreationForm(instance=user)
     
-    return render(request, 'users/modifier_utilisateur.html', {
+    return render(request, 'modifier_utilisateur.html', {
         'form': form,
         'user_to_modify': user
     })
@@ -735,16 +738,72 @@ def supprimer_utilisateur(request, user_id):
         user = CustomUser.objects.get(id=user_id)
     except CustomUser.DoesNotExist:
         messages.error(request, 'Utilisateur introuvable.')
-        return redirect('liste_utilisateurs')
+        return redirect('gestionAbst:liste_utilisateurs')
     
     if request.method == 'POST':
         username = user.username
         user.delete()
         messages.success(request, f'Utilisateur {username} supprimé avec succès.')
-        return redirect('liste_utilisateurs')
+        return redirect('gestionAbst:liste_utilisateurs')
     
-    return render(request, 'users/confirmer_suppression.html', {'user_to_delete': user})
+    return render(request, 'confirmer_suppression.html', {'user_to_delete': user})
 # Vue pour les statistiques (bonus)
+
+@login_required
+@user_passes_test(is_admin)
+@require_POST  # N'autorise que les requêtes POST
+def activer_utilisateur(request, user_id):
+    """Vue pour activer un compte utilisateur."""
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        if user.is_active:
+            messages.warning(request, f"L'utilisateur {user.username} est déjà actif.")
+        else:
+            user.is_active = True
+            user.save(update_fields=['is_active'])
+            messages.success(request, f"Le compte de l'utilisateur {user.username} a été activé.")
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Utilisateur introuvable.")
+    
+    return redirect('gestionAbst:liste_utilisateurs')
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_POST  # N'autorise que les requêtes POST
+def desactiver_utilisateur(request, user_id):
+    """Vue pour désactiver un compte utilisateur."""
+    # Empêche un administrateur de se désactiver lui-même
+    if request.user.id == user_id:
+        messages.error(request, "Vous ne pouvez pas désactiver votre propre compte.")
+        return redirect('gestionAbst:liste_utilisateurs')
+        
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        if not user.is_active:
+            messages.warning(request, f"L'utilisateur {user.username} est déjà inactif.")
+        else:
+            user.is_active = False
+            user.save(update_fields=['is_active'])
+            messages.info(request, f"Le compte de l'utilisateur {user.username} a été désactivé.")
+    except CustomUser.DoesNotExist:
+        messages.error(request, "Utilisateur introuvable.")
+
+    return redirect('gestionAbst:liste_utilisateurs')
+def detail_utilisateur(request, user_id):
+    """
+    Affiche la page de détail pour un utilisateur spécifique.
+    """
+    # On récupère l'utilisateur ou on renvoie une erreur 404 s'il n'existe pas
+    user_details = get_object_or_404(CustomUser, id=user_id)
+    
+    context = {
+        'title': f'Détails de {user_details.username}',
+        'user_details': user_details
+    }
+    
+    # On va rendre un nouveau template pour cette page de détail
+    return render(request, 'detail_utilisateur.html', context)
 @login_required
 @user_passes_test(is_admin)
 def statistiques_utilisateurs(request):

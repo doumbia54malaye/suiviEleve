@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription Utilisateur</title>
+    <title>Modifier Utilisateur</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -119,10 +119,8 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
                     <div class="form-card">
-                        <div class="form-header">
-                            <h1><i class="fas fa-user-plus"></i> Inscription Utilisateur</h1>
-                            <p class="mb-0">Créer un nouvel compte utilisateur</p>
-                        </div>
+                        <h1><i class="fas fa-user-edit"></i> Modifier {{ user_to_modify.username }}</h1>
+                        <p class="mb-0">Mettre à jour les informations de l'utilisateur</p>
                         
                         <div class="form-body">
                             <!-- Messages de succès/erreur -->
@@ -135,7 +133,7 @@
                                 {% endfor %}
                             {% endif %}
 
-                            <form method="post" id="userForm" novalidate action="{% url 'gestionAbst:inscription_utilisateur' %}">
+                            <form method="post" id="userForm" novalidate action="{% url 'gestionAbst:modifier_utilisateur' user_to_modify.id %}">
                                 {% csrf_token %}
                                 
                                 <!-- Section Type d'utilisateur -->
@@ -276,35 +274,29 @@
                                         {% endif %}
                                         <div id="email-feedback" class="error-message" style="display: none;"></div>
                                     </div>
-                                    
+                                    <div class="alert alert-info small py-2">
+                                        <i class="fas fa-info-circle"></i>
+                                        Laissez les champs de mot de passe vides pour ne pas le modifier.
+                                    </div>
                                     <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="id_password1" class="form-label required-field">Mot de passe</label>
-                                            <input type="password" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
-                                                id="id_password1" name="password1" required>
-                                            <div class="password-strength" id="password-strength"></div>
-                                            {% if form.password1.errors %}
-                                                <div class="error-message">
-                                                    {% for error in form.password1.errors %}
-                                                        {{ error }}
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                        
-                                        <div class="col-md-6 mb-3">
-                                            <label for="id_password2" class="form-label required-field">Confirmer le mot de passe</label>
-                                            <input type="password" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
-                                                id="id_password2" name="password2" required>
-                                            {% if form.password2.errors %}
-                                                <div class="error-message">
-                                                    {% for error in form.password2.errors %}
-                                                        {{ error }}
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
-                                            <div class="error-message" id="password2_error" style="display: none;"></div>
-                                        </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_password1" class="form-label">Mot de passe</label> <!-- J'ai retiré required-field -->
+                                        <input type="password" class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
+                                            id="id_password1" name="password1"> <!-- J'ai retiré l'attribut required -->
+                                        <div class="password-strength" id="password-strength"></div>
+                                        {% if form.password1.errors %}
+                                            <!-- ... gestion des erreurs password1 ... -->
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="id_password2" class="form-label">Confirmer le mot de passe</label> <!-- J'ai retiré required-field -->
+                                        <input type="password" class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
+                                            id="id_password2" name="password2"> <!-- J'ai retiré l'attribut required -->
+                                        {% if form.password2.errors %}
+                                            <!-- ... gestion des erreurs password2 ... -->
+                                        {% endif %}
+                                        <div class="error-message" id="password2_error" style="display: none;"></div>
                                     </div>
                                 </div>
 
@@ -341,10 +333,10 @@
 
                                 <!-- Boutons d'action -->
                                 <div class="text-center mt-4">
-                                    <button type="submit" class="btn btn-custom me-3">
-                                        <i class="fas fa-user-plus"></i>
-                                        Créer le compte
-                                    </button>
+                                     <button type="submit" class="btn btn-custom me-3">
+                                            <i class="fas fa-save"></i>
+                                            Enregistrer les modifications
+                                        </button>
                                     <a href="/dashboard/" class="btn btn-secondary">
                                         <i class="fas fa-arrow-left"></i>
                                         Retour

@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import *
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserChangeForm
 import random
 import datetime
 import re
@@ -100,7 +101,8 @@ class EleveForm(forms.ModelForm):
             raise ValidationError("Les prénoms ne doivent contenir que des lettres.")
         
         return prenoms
-    
+
+
 class CustomUserCreationForm(UserCreationForm):
     USER_TYPE_CHOICES = [
         ('admin', 'Administrateur'),
@@ -147,6 +149,10 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ('username', 'first_name', 'last_name', 'email', 'user_type',
                   'phone_number', 'password1', 'password2', 'is_active', 'is_staff')
 
+    class Meta(UserCreationForm.Meta):
+        model = CustomUser
+        fields = ('username', 'email', 'first_name', 'last_name', 'user_type', 'phone_number', 'is_active', 'is_staff')
+
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if email and CustomUser.objects.filter(email=email).exists():
@@ -190,6 +196,24 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+class CustomUserChangeForm(forms.ModelForm):
+    # On redéfinit les champs de mot de passe pour les rendre optionnels
+    password = forms.CharField(widget=forms.PasswordInput, required=False, label="Nouveau mot de passe")
+    password2 = forms.CharField(widget=forms.PasswordInput, required=False, label="Confirmation du nouveau mot de passe")
+
+    class Meta:
+        model = CustomUser
+        # On liste les champs modifiables
+        fields = ('username', 'email', 'first_name', 'last_name', 'user_type', 'phone_number', 'is_active', 'is_staff')
+
+    def clean_password2(self):
+        # Cette fonction spéciale est appelée lors de la validation
+        # Elle vérifie que si un mot de passe est fourni, les deux champs correspondent.
+        cd = self.cleaned_data
+        if cd.get('password') and cd.get('password2') and cd['password'] != cd['password2']:
+            raise forms.ValidationError("Les mots de passe ne correspondent pas.")
+        return cd.get('password2')
 def clean(self):
     cleaned_data = super().clean()
     # Validation croisée des champs si nécessaire

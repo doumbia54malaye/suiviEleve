@@ -241,10 +241,6 @@
     </style>
 </head>
 <body>
-    {{teachers_count}}
-    {{total_matieres}}
-    {{total_classes}}
- 
     <div class="main-container">
         <div class="container-fluid">
             <div class="content-card">
@@ -252,7 +248,6 @@
                     <h1><i class="fas fa-chalkboard-teacher"></i> {{ title|default:"Liste des enseignements" }}</h1>
                     <p class="mb-0">Gestion des affectations enseignants-matières-classes</p>
                 </div>
-                
                 <div class="content-body">
                     <!-- Messages de succès/erreur -->
                     {% if messages %}

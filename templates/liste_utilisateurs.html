@@ -1,0 +1,525 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #5200a3 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .stats-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .filter-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .table-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .table thead {
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            color: white;
+        }
+        .table th {
+            border: none;
+            font-weight: 600;
+            padding: 15px;
+        }
+        .table td {
+            padding: 15px;
+            vertical-align: middle;
+            border-top: 1px solid #f1f3f4;
+        }
+        .btn-action {
+            padding: 5px 10px;
+            margin: 2px;
+            border-radius: 5px;
+            font-size: 0.875rem;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .btn-primary-custom {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+        }
+        .btn-primary-custom:hover {
+            transform: scale(1.05);
+            color: white;
+        }
+        .badge-status {
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .badge-actif {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-inactif {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .badge-admin {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-teacher {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .badge-parent {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        .search-bar {
+            position: relative;
+        }
+        .search-bar i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        .pagination-custom .page-link {
+            border: none;
+            color: #3498db;
+            margin: 0 2px;
+            border-radius: 8px;
+        }
+        .pagination-custom .page-item.active .page-link {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        @media (max-width: 768px) {
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            .btn-action {
+                padding: 3px 6px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- En-tête de la page -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-users-cog"></i> {{ title }}</h1>
+                    <p class="mb-0">Gestion des utilisateurs du système</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'gestionAbst:compteUser' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus"></i> Nouvel utilisateur
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Statistiques -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="mb-1">{{ total_users }}</h3>
+                    <p class="text-muted mb-0">Total utilisateurs</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-success">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <h3 class="mb-1">{{ teachers_count }}</h3>
+                    <p class="text-muted mb-0">Enseignants</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-warning">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <h3 class="mb-1">{{ admins_count }}</h3>
+                    <p class="text-muted mb-0">Administrateurs</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="stats-card">
+                    <div class="stats-icon text-info">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <h3 class="mb-1">{{ parents_count }}</h3>
+                    <p class="text-muted mb-0">Parents</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Filtres et recherche -->
+        <div class="filter-card">
+            <form method="get" class="row g-3" id="filterForm">
+                <div class="col-md-4">
+                    <label class="form-label">Rechercher un utilisateur</label>
+                    <div class="search-bar">
+                        <input type="text" class="form-control" name="search" 
+                               placeholder="Nom, email ou nom d'utilisateur..." 
+                               value="{{ request.GET.search }}">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Type d'utilisateur</label>
+                    <select name="user_type" class="form-control">
+                        <option value="">Tous les types</option>
+                        <option value="admin" {% if user_type_selectionne == "admin" %}selected{% endif %}>
+                            Administrateurs
+                        </option>
+                        <option value="teacher" {% if user_type_selectionne == "teacher" %}selected{% endif %}>
+                            Enseignants
+                        </option>
+                        <option value="parent" {% if user_type_selectionne == "parent" %}selected{% endif %}>
+                            Parents
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Statut</label>
+                    <select name="statut" class="form-control">
+                        <option value="">Tous les statuts</option>
+                        <option value="actif" {% if statut_selectionne == "actif" %}selected{% endif %}>
+                            Actifs seulement
+                        </option>
+                        <option value="inactif" {% if statut_selectionne == "inactif" %}selected{% endif %}>
+                            Inactifs seulement
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="fas fa-filter"></i> Filtrer
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tableau des utilisateurs -->
+        <div class="table-card">
+            {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Nom complet</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Téléphone</th>
+                                <th>Statut</th>
+                                <th>Dernière connexion</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar">
+                                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                                            </div>
+                                            <div>
+                                                <strong class="text-primary">{{ user.username }}</strong>
+                                                <br>
+                                                <small class="text-muted">
+                                                    Inscrit le {{ user.created_at|date:"d/m/Y" }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:{{ user.email }}" class="text-decoration-none">
+                                            <i class="fas fa-envelope"></i> {{ user.email }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if user.user_type == 'admin' %}
+                                            <span class="badge-status badge-admin">
+                                                <i class="fas fa-user-shield"></i> Administrateur
+                                            </span>
+                                        {% elif user.user_type == 'teacher' %}
+                                            <span class="badge-status badge-teacher">
+                                                <i class="fas fa-chalkboard-teacher"></i> Enseignant
+                                            </span>
+                                        {% elif user.user_type == 'parent' %}
+                                            <span class="badge-status badge-parent">
+                                                <i class="fas fa-user-friends"></i> Parent
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.phone_number %}
+                                            <a href="tel:{{ user.phone_number }}" class="text-decoration-none">
+                                                <i class="fas fa-phone"></i> {{ user.phone_number }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Non renseigné</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge-status badge-actif">
+                                                <i class="fas fa-check-circle"></i> Actif
+                                            </span>
+                                        {% else %}
+                                            <span class="badge-status badge-inactif">
+                                                <i class="fas fa-times-circle"></i> Inactif
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.last_login %}
+                                            {{ user.last_login|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            <span class="text-muted">Jamais connecté</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-wrap">
+                                            <a href="{% url 'gestionAbst:detail_utilisateur' user.id %}" 
+                                               class="btn-action btn btn-info btn-sm" 
+                                               title="Voir détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'gestionAbst:modifier_utilisateur' user.id %}" 
+                                               class="btn-action btn btn-warning btn-sm" 
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            {% if user.is_active %}
+                                                <button type="button" 
+                                                        class="btn-action btn btn-secondary btn-sm" 
+                                                        title="Désactiver"
+                                                        onclick="confirmerDesactivation('{{ user.id }}', '{{ user.first_name }} {{ user.last_name }}')">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                            {% else %}
+                                                <button type="button" 
+                                                        class="btn-action btn btn-success btn-sm" 
+                                                        title="Activer"
+                                                        onclick="confirmerActivation('{{ user.id }}', '{{ user.first_name }} {{ user.last_name }}')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            {% endif %}
+                                            {% if user != request.user %}
+                                                <button type="button" 
+                                                        class="btn-action btn btn-danger btn-sm" 
+                                                        title="Supprimer"
+                                                        onclick="confirmerSuppression('{{ user.id }}', '{{ user.first_name }} {{ user.last_name }}')">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-users-slash"></i>
+                    <h3>Aucun utilisateur trouvé</h3>
+                    <p>
+                        {% if request.GET.search or user_type_selectionne or statut_selectionne %}
+                            Aucun utilisateur ne correspond aux critères de recherche.
+                            <br><a href="{% url 'gestionAbst:liste_utilisateurs' %}" class="btn btn-link">Réinitialiser les filtres</a>
+                        {% else %}
+                            Commencez par ajouter votre premier utilisateur.
+                            <br><a href="{% url 'gestionAbst:compteUser' %}" class="btn btn-primary mt-3">
+                                <i class="fas fa-plus"></i> Ajouter un utilisateur
+                            </a>
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="confirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> 
+                        <span id="modalTitle">Confirmer l'action</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                    <p class="text-danger" id="modalWarning">
+                        <i class="fas fa-warning"></i> 
+                        Cette action est irréversible.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="post" id="actionForm" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn" id="confirmButton">
+                            <i class="fas fa-check"></i> Confirmer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Fonction pour confirmer la suppression
+        function confirmerSuppression(userId, userName) {
+            document.getElementById('modalTitle').textContent = 'Confirmer la suppression';
+            document.getElementById('modalMessage').innerHTML = 
+                `Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>${userName}</strong> ?`;
+            document.getElementById('modalWarning').style.display = 'block';
+            document.getElementById('confirmButton').className = 'btn btn-danger';
+            document.getElementById('confirmButton').innerHTML = '<i class="fas fa-trash"></i> Supprimer';
+            document.getElementById('actionForm').action = "{% url 'gestionAbst:supprimer_utilisateur' 0 %}".replace('0', userId);
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Fonction pour confirmer la désactivation
+        function confirmerDesactivation(userId, userName) {
+            document.getElementById('modalTitle').textContent = 'Confirmer la désactivation';
+            document.getElementById('modalMessage').innerHTML = 
+                `Êtes-vous sûr de vouloir désactiver l'utilisateur <strong>${userName}</strong> ?`;
+            document.getElementById('modalWarning').style.display = 'none';
+            document.getElementById('confirmButton').className = 'btn btn-secondary';
+            document.getElementById('confirmButton').innerHTML = '<i class="fas fa-ban"></i> Désactiver';
+            document.getElementById('actionForm').action = "{% url 'gestionAbst:desactiver_utilisateur' 0 %}".replace('0', userId);
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Fonction pour confirmer l'activation
+        function confirmerActivation(userId, userName) {
+            document.getElementById('modalTitle').textContent = 'Confirmer l\'activation';
+            document.getElementById('modalMessage').innerHTML = 
+                `Êtes-vous sûr de vouloir activer l'utilisateur <strong>${userName}</strong> ?`;
+            document.getElementById('modalWarning').style.display = 'none';
+            document.getElementById('confirmButton').className = 'btn btn-success';
+            document.getElementById('confirmButton').innerHTML = '<i class="fas fa-check"></i> Activer';
+            document.getElementById('actionForm').action = "{% url 'gestionAbst:activer_utilisateur' 0 %}".replace('0', userId);
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+        }
+
+        // Auto-submit du formulaire de filtre lors du changement
+        document.querySelectorAll('#filterForm select').forEach(select => {
+            select.addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+        });
+
+        // Recherche avec délai
+        let searchTimeout;
+        document.querySelector('input[name="search"]').addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                document.getElementById('filterForm').submit();
+            }, 500);
+        });
+
+        // Raccourcis clavier
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + N pour nouvel utilisateur
+            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                e.preventDefault();
+                window.location.href = "{% url 'gestionAbst:compteUser' %}";
+            }
+            
+            // Escape pour réinitialiser les filtres
+            if (e.key === 'Escape') {
+                window.location.href = "{% url 'gestionAbst:liste_utilisateurs' %}";
+            }
+        });
+    </script>
+</body>
+</html>
