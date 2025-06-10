@@ -64,6 +64,10 @@ urlpatterns = [
     
     # API pour les données du dashboard parent (que vous aviez déjà)
     path('api/parent/dashboard-data/', views.api_parent_dashboard_data, name='api_parent_dashboard_data'),
+    #---------------------ESPACE ESEIGNANT---------------------
+    path('api/teacher/dashboard/', views.teacher_dashboard_data, name='teacher_dashboard_data'),
+    path('api/teacher/classes/students/', views.teacher_classes_students, name='teacher_classes_students'),
+    path('api/teacher/attendance/save/', views.save_attendance, name='save_attendance'),
 
     # Gestion des séances
     path('seances/', views.seance_list, name='seance_list'),

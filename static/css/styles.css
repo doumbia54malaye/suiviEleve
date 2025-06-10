@@ -112,12 +112,15 @@ body {
 .card-header {
   padding: 1.5rem 1.5rem 0.5rem;
   border-bottom: 1px solid var(--border-color);
+  background-color: var(--primary);
+  color: var(--white);
 }
 
 .card-header h2 {
   margin-bottom: 0.5rem;
   font-weight: 600;
   font-size: 1.25rem;
+  color: var(--white);
 }
 
 .card-header p {

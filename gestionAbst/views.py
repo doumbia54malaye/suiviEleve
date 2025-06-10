@@ -13,6 +13,7 @@ from django.contrib.auth import authenticate, login
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
+from datetime import date, datetime, timedelta
 from .models import *
 from .forms import *
 import json
@@ -821,3 +822,189 @@ def statistiques_utilisateurs(request):
     }
     
     return render(request, 'users/statistiques.html', {'stats': stats})
+
+#--------------------------------------------------------------------------------
+#----------------------------espace enseignant------------------------------------
+#--------------------------------------------------------------------------------
+@login_required
+@require_http_methods(["GET"])
+def teacher_dashboard_data(request):
+    """API pour récupérer les données du tableau de bord enseignant"""
+    if request.user.user_type != 'teacher':
+        return JsonResponse({'error': 'Accès non autorisé'}, status=403)
+    
+    try:
+        # Récupérer les enseignements de l'enseignant
+        enseignements = Enseignement.objects.filter(
+            enseignant=request.user,
+            annee_scolaire='2024-2025'
+        ).select_related('classe', 'matiere')
+        
+        # Séances d'aujourd'hui
+        today = timezone.now().date()
+        seances_today = Seance.objects.filter(
+            enseignement__enseignant=request.user,
+            date=today
+        ).select_related('enseignement__classe', 'enseignement__matiere').order_by('heure_debut')
+        
+        # Statistiques
+        total_classes = enseignements.values('classe').distinct().count()
+        total_seances_week = Seance.objects.filter(
+            enseignement__enseignant=request.user,
+            date__gte=today - timedelta(days=7)
+        ).count()
+        
+        # Séances sans appel fait
+        seances_sans_appel = Seance.objects.filter(
+            enseignement__enseignant=request.user,
+            appel_fait=False,
+            date__lte=today
+        ).count()
+        
+        # Notes à saisir (simulé - vous pouvez adapter selon vos besoins)
+        notes_a_saisir = 5  # Exemple
+        
+        # Formater les données pour le JSON
+        seances_data = []
+        for seance in seances_today:
+            seances_data.append({
+                'id': seance.id,
+                'classe': seance.enseignement.classe.nom,
+                'matiere': seance.enseignement.matiere.nom,
+                'heure_debut': seance.heure_debut.strftime('%H:%M'),
+                'heure_fin': seance.heure_fin.strftime('%H:%M'),
+                'description': seance.description,
+                'appel_fait': seance.appel_fait
+            })
+        
+        data = {
+            'success': True,
+            'user_name': f"{request.user.first_name} {request.user.last_name}".strip() or request.user.username,
+            'stats': {
+                'total_classes': total_classes,
+                'seances_semaine': total_seances_week,
+                'seances_sans_appel': seances_sans_appel,
+                'notes_a_saisir': notes_a_saisir
+            },
+            'seances_today': seances_data,
+            'enseignements': [
+                {
+                    'id': ens.id,
+                    'classe': ens.classe.nom,
+                    'matiere': ens.matiere.nom
+                } for ens in enseignements
+            ]
+        }
+        
+        return JsonResponse(data)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@require_http_methods(["GET"])
+def teacher_classes_students(request):
+    """API pour récupérer les élèves d'une classe"""
+    classe_id = request.GET.get('classe_id')
+    
+    if not classe_id:
+        return JsonResponse({'error': 'ID de classe requis'}, status=400)
+    
+    try:
+        # Vérifier que l'enseignant a accès à cette classe
+        enseignement = Enseignement.objects.filter(
+            enseignant=request.user,
+            classe_id=classe_id,
+            annee_scolaire='2024-2025'
+        ).first()
+        
+        if not enseignement:
+            return JsonResponse({'error': 'Accès non autorisé à cette classe'}, status=403)
+        
+        # Récupérer les élèves de la classe
+        eleves = Eleve.objects.filter(classe_id=classe_id).order_by('nom', 'prenom')
+        
+        eleves_data = [
+            {
+                'id': eleve.id,
+                'nom': eleve.nom,
+                'prenom': eleve.prenom,
+                'numero_ordre': eleve.numero_ordre if hasattr(eleve, 'numero_ordre') else None
+            } for eleve in eleves
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'eleves': eleves_data,
+            'classe_nom': enseignement.classe.nom
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+@require_http_methods(["POST"])
+def save_attendance(request):
+    """API pour enregistrer l'appel"""
+    if request.user.user_type != 'teacher':
+        return JsonResponse({'error': 'Accès non autorisé'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        enseignement_id = data.get('enseignement_id')
+        date_seance = data.get('date')
+        heure_debut = data.get('heure_debut')
+        heure_fin = data.get('heure_fin')
+        presences = data.get('presences', [])
+        
+        # Vérifier l'enseignement
+        enseignement = Enseignement.objects.filter(
+            id=enseignement_id,
+            enseignant=request.user
+        ).first()
+        
+        if not enseignement:
+            return JsonResponse({'error': 'Enseignement non trouvé'}, status=404)
+        
+        # Créer ou récupérer la séance
+        seance, created = Seance.objects.get_or_create(
+            enseignement=enseignement,
+            date=datetime.strptime(date_seance, '%Y-%m-%d').date(),
+            heure_debut=datetime.strptime(heure_debut, '%H:%M').time(),
+            defaults={
+                'heure_fin': datetime.strptime(heure_fin, '%H:%M').time(),
+                'appel_fait': True
+            }
+        )
+        
+        if not created:
+            seance.appel_fait = True
+            seance.save()
+        
+        # Enregistrer les présences
+        for presence_data in presences:
+            eleve_id = presence_data.get('eleve_id')
+            statut = presence_data.get('statut', 'present')
+            remarque = presence_data.get('remarque', '')
+            
+            Presence.objects.update_or_create(
+                seance=seance,
+                eleve_id=eleve_id,
+                defaults={
+                    'statut': statut,
+                    'remarque': remarque
+                }
+            )
+        
+        # Compter les absents pour le retour
+        absents_count = len([p for p in presences if p.get('statut') == 'absent'])
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Appel enregistré avec succès. {absents_count} élève(s) absent(s).',
+            'seance_id': seance.id,
+            'absents_count': absents_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

@@ -1,6 +1,5 @@
-
+// attendance.js - Version dynamique avec API
 document.addEventListener('DOMContentLoaded', function() {
-  // Éléments du DOM
   const attendanceForm = document.getElementById('attendanceForm');
   const classSelect = document.getElementById('class');
   const subjectSelect = document.getElementById('subject');
@@ -9,10 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const resetBtn = document.getElementById('resetBtn');
   const submitBtn = document.getElementById('submitBtn');
   
-  // Variables d'état
   let students = [];
-  let absentStudents = new Set();
+  let studentStatuses = new Map(); // Map pour stocker les statuts des élèves
   let isSubmitted = false;
+  let currentEnseignements = [];
   
   // Configuration du toast
   const toast = {
@@ -25,10 +24,8 @@ document.addEventListener('DOMContentLoaded', function() {
       this.title.textContent = title;
       this.body.textContent = message;
       
-      // Réinitialiser les classes
       this.element.className = 'toast show';
       
-      // Ajouter la classe selon le type
       if (type === 'error') {
         this.element.style.borderLeftColor = 'var(--danger)';
         this.title.previousElementSibling.style.color = 'var(--danger)';
@@ -37,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
         this.title.previousElementSibling.style.color = 'var(--primary)';
       }
       
-      // Masquer automatiquement après 5 secondes
       setTimeout(() => {
         this.hide();
       }, 5000);
@@ -47,59 +43,140 @@ document.addEventListener('DOMContentLoaded', function() {
       this.element.classList.remove('show');
     }
   };
-  
-  // Vérifier si des paramètres sont passés dans l'URL
-  function checkQueryParams() {
-    const params = new URLSearchParams(window.location.search);
-    const classParam = params.get('class');
-    const timeParam = params.get('time');
-    
-    if (classParam) {
-      // Trouver une option correspondante ou similaire
-      const options = Array.from(classSelect.options);
-      const option = options.find(opt => opt.value.replace(/\s+/g, '') === classParam);
+
+  // Fonction pour faire les requêtes API
+  async function apiRequest(url, options = {}) {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+          ...options.headers
+        }
+      });
       
-      if (option) {
-        classSelect.value = option.value;
-        loadStudents(option.value);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    }
-    
-    if (timeParam && timeSlotSelect) {
-      const options = Array.from(timeSlotSelect.options);
-      const option = options.find(opt => opt.value === timeParam);
       
-      if (option) {
-        timeSlotSelect.value = option.value;
-      }
+      return await response.json();
+    } catch (error) {
+      console.error('Erreur API:', error);
+      throw error;
     }
   }
-  
-  // Générer des élèves fictifs pour une classe
-  function generateMockStudents(className) {
-    const count = 10 + Math.floor(Math.random() * 15); // Entre 10 et 25 élèves
-    return Array.from({ length: count }, (_, i) => ({
-      id: `student-${className.replace(/\s+/g, '')}-${i}`,
-      firstName: `Prénom ${i + 1}`,
-      lastName: `Nom ${i + 1}`
-    }));
+
+  // Récupérer le token CSRF
+  function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   }
-  
+
+  // Charger les enseignements de l'enseignant
+  async function loadTeacherData() {
+    try {
+      const data = await apiRequest('/api/teacher/dashboard/');
+      
+      if (data.success) {
+        currentEnseignements = data.enseignements;
+        populateClassSelect();
+      } else {
+        throw new Error(data.error || 'Erreur lors du chargement des données');
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des enseignements:', error);
+      toast.show('Erreur', 'Impossible de charger vos classes', 'error');
+    }
+  }
+
+  // Remplir la liste déroulante des classes
+  function populateClassSelect() {
+    if (!classSelect) return;
+    
+    // Vider les options existantes sauf la première
+    while (classSelect.children.length > 1) {
+      classSelect.removeChild(classSelect.lastChild);
+    }
+    
+    // Grouper par classe pour éviter les doublons
+    const classes = [...new Set(currentEnseignements.map(ens => ens.classe))];
+    
+    classes.forEach(classe => {
+      const option = document.createElement('option');
+      option.value = classe;
+      option.textContent = classe;
+      classSelect.appendChild(option);
+    });
+  }
+
+  // Remplir la liste des matières en fonction de la classe sélectionnée
+  function populateSubjectSelect(selectedClass) {
+    if (!subjectSelect || !selectedClass) return;
+    
+    // Vider les options existantes sauf la première
+    while (subjectSelect.children.length > 1) {
+      subjectSelect.removeChild(subjectSelect.lastChild);
+    }
+    
+    // Trouver les matières pour cette classe
+    const matieres = currentEnseignements
+      .filter(ens => ens.classe === selectedClass)
+      .map(ens => ens.matiere);
+    
+    matieres.forEach(matiere => {
+      const option = document.createElement('option');
+      option.value = matiere;
+      option.textContent = matiere;
+      subjectSelect.appendChild(option);
+    });
+    
+    // Réinitialiser la sélection
+    subjectSelect.value = '';
+  }
+
   // Charger les élèves pour une classe
-  function loadStudents(className) {
+  async function loadStudents(className) {
     if (!className) return;
     
-    // Réinitialiser
-    absentStudents.clear();
-    isSubmitted = false;
-    
-    // Générer des élèves fictifs
-    students = generateMockStudents(className);
-    
-    // Mettre à jour l'interface
-    renderStudentsList();
+    try {
+      // Trouver l'enseignement correspondant pour récupérer l'ID de la classe
+      const enseignement = currentEnseignements.find(ens => ens.classe === className);
+      if (!enseignement) {
+        throw new Error('Classe non trouvée dans vos enseignements');
+      }
+      
+      const data = await apiRequest(`/api/teacher/classes/students/?classe_id=${enseignement.id}`);
+      
+      if (data.success) {
+        students = data.eleves;
+        studentStatuses.clear();
+        
+        // Initialiser tous les élèves comme présents
+        students.forEach(student => {
+          studentStatuses.set(student.id, {
+            statut: 'present',
+            remarque: ''
+          });
+        });
+        
+        renderStudentsList();
+      } else {
+        throw new Error(data.error || 'Erreur lors du chargement des élèves');
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement des élèves:', error);
+      toast.show('Erreur', error.message, 'error');
+      
+      // Afficher un message d'erreur dans la liste
+      studentsList.innerHTML = `
+        <div class="placeholder-message">
+          <p class="text-danger">Erreur lors du chargement des élèves: ${error.message}</p>
+        </div>
+      `;
+    }
   }
-  
+
   // Afficher la liste des élèves
   function renderStudentsList() {
     if (!studentsList || !students.length) {
@@ -110,168 +187,336 @@ document.addEventListener('DOMContentLoaded', function() {
       `;
       return;
     }
-    
+
     let html = `
       <div class="students-header">
-        <h3>Liste des élèves</h3>
+        <h3>Liste des élèves (${students.length})</h3>
+        ${!isSubmitted ? `
+          <div class="bulk-actions">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="markAllPresent()">
+              Tous présents
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-warning" onclick="markAllAbsent()">
+              Tous absents
+            </button>
+          </div>
+        ` : ''}
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th class="w-50">Absent</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th class="text-right">Action</th>
-          </tr>
-        </thead>
-        <tbody>
+      <div class="students-table">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Statut</th>
+              <th>Remarques</th>
+            </tr>
+          </thead>
+          <tbody>
     `;
-    
+
     students.forEach(student => {
-      const isAbsent = absentStudents.has(student.id);
-      
+      const status = studentStatuses.get(student.id);
+      const isPresent = status.statut === 'present';
+      const isAbsent = status.statut === 'absent';
+      const isLate = status.statut === 'retard';
+
       html += `
-        <tr>
-          <td>
-            ${isSubmitted ? 
-              `<input type="checkbox" ${isAbsent ? 'checked' : ''} disabled>` :
-              `<div class="checkbox-container">
-                <input type="checkbox" id="${student.id}" ${isAbsent ? 'checked' : ''} 
-                  onchange="toggleAbsence('${student.id}')">
-                <span class="checkmark"></span>
-              </div>`
-            }
+        <tr class="student-row ${status.statut}" data-student-id="${student.id}">
+          <td class="student-name">${student.nom}</td>
+          <td class="student-firstname">${student.prenom}</td>
+          <td class="status-controls">
+            ${!isSubmitted ? `
+              <div class="status-buttons">
+                <button type="button" 
+                        class="status-btn present ${isPresent ? 'active' : ''}" 
+                        onclick="updateStudentStatus(${student.id}, 'present')"
+                        title="Présent">
+                  <i class="fa-solid fa-check"></i>
+                </button>
+                <button type="button" 
+                        class="status-btn absent ${isAbsent ? 'active' : ''}" 
+                        onclick="updateStudentStatus(${student.id}, 'absent')"
+                        title="Absent">
+                  <i class="fa-solid fa-times"></i>
+                </button>
+                <button type="button" 
+                        class="status-btn late ${isLate ? 'active' : ''}" 
+                        onclick="updateStudentStatus(${student.id}, 'retard')"
+                        title="Retard">
+                  <i class="fa-solid fa-clock"></i>
+                </button>
+              </div>
+            ` : `
+              <span class="status-label ${status.statut}">
+                ${getStatusLabel(status.statut)}
+              </span>
+            `}
           </td>
-          <td>${student.lastName}</td>
-          <td>${student.firstName}</td>
-          <td class="text-right">
-            ${isSubmitted && isAbsent ? 
-              `<span class="text-danger" style="font-size: 0.75rem;">SMS envoyé aux parents</span>` : 
-              ''}
+          <td class="remarks">
+            ${!isSubmitted ? `
+              <input type="text" 
+                     class="form-control form-control-sm" 
+                     placeholder="Remarques..."
+                     value="${status.remarque}"
+                     onchange="updateStudentRemarks(${student.id}, this.value)">
+            ` : `
+              <span class="remark-text">${status.remarque || '-'}</span>
+            `}
           </td>
         </tr>
       `;
     });
-    
+
     html += `
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
     `;
-    
+
     studentsList.innerHTML = html;
+    updateSubmitButton();
+  }
+
+  // Mettre à jour le statut d'un élève
+  function updateStudentStatus(studentId, newStatus) {
+    const currentStatus = studentStatuses.get(studentId);
+    studentStatuses.set(studentId, {
+      ...currentStatus,
+      statut: newStatus
+    });
     
-    // Ajouter les gestionnaires d'événements pour les checkboxes
-    if (!isSubmitted) {
-      const checkboxes = studentsList.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-          toggleAbsence(this.id);
-        });
+    // Mettre à jour l'affichage de cette ligne
+    const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+    if (row) {
+      row.className = `student-row ${newStatus}`;
+      
+      // Mettre à jour les boutons actifs
+      const buttons = row.querySelectorAll('.status-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.classList.contains(newStatus === 'retard' ? 'late' : newStatus)) {
+          btn.classList.add('active');
+        }
       });
     }
+    
+    updateSubmitButton();
   }
-  
-  // Marquer/démarquer un élève comme absent
-  function toggleAbsence(studentId) {
-    if (absentStudents.has(studentId)) {
-      absentStudents.delete(studentId);
-    } else {
-      absentStudents.add(studentId);
+
+  // Mettre à jour les remarques d'un élève
+  function updateStudentRemarks(studentId, remarks) {
+    const currentStatus = studentStatuses.get(studentId);
+    studentStatuses.set(studentId, {
+      ...currentStatus,
+      remarque: remarks
+    });
+  }
+
+  // Obtenir le libellé du statut
+  function getStatusLabel(status) {
+    const labels = {
+      'present': 'Présent',
+      'absent': 'Absent',
+      'retard': 'Retard'
+    };
+    return labels[status] || status;
+  }
+
+  // Marquer tous les élèves comme présents
+  window.markAllPresent = function() {
+    students.forEach(student => {
+      studentStatuses.set(student.id, {
+        ...studentStatuses.get(student.id),
+        statut: 'present'
+      });
+    });
+    renderStudentsList();
+  };
+
+  // Marquer tous les élèves comme absents
+  window.markAllAbsent = function() {
+    students.forEach(student => {
+      studentStatuses.set(student.id, {
+        ...studentStatuses.get(student.id),
+        statut: 'absent'
+      });
+    });
+    renderStudentsList();
+  };
+
+  // Mettre à jour l'état du bouton de soumission
+  function updateSubmitButton() {
+    if (!submitBtn) return;
+    
+    const hasStudents = students.length > 0;
+    const hasFormData = classSelect.value && subjectSelect.value && timeSlotSelect.value;
+    
+    submitBtn.disabled = !hasStudents || !hasFormData || isSubmitted;
+    
+    if (isSubmitted) {
+      submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Appel enregistré';
+      submitBtn.classList.remove('btn-primary');
+      submitBtn.classList.add('btn-success');
     }
   }
-  
-  // Gérer la soumission du formulaire
-  function handleFormSubmit(event) {
-    event.preventDefault();
-    
-    const selectedClass = classSelect.value;
-    const selectedSubject = subjectSelect.value;
-    const selectedTimeSlot = timeSlotSelect.value;
-    
-    // Vérification des champs obligatoires
-    if (!selectedClass || !selectedSubject || !selectedTimeSlot) {
-      toast.show('Informations manquantes', 'Veuillez sélectionner une classe, une matière et un horaire.', 'error');
+
+  // Enregistrer l'appel
+  async function saveAttendance() {
+    try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enregistrement...';
+      
+      // Récupérer l'enseignement correspondant
+      const selectedClass = classSelect.value;
+      const selectedSubject = subjectSelect.value;
+      const enseignement = currentEnseignements.find(ens => 
+        ens.classe === selectedClass && ens.matiere === selectedSubject
+      );
+      
+      if (!enseignement) {
+        throw new Error('Enseignement non trouvé');
+      }
+      
+      // Préparer les données de présence
+      const presences = students.map(student => {
+        const status = studentStatuses.get(student.id);
+        return {
+          eleve_id: student.id,
+          statut: status.statut,
+          remarque: status.remarque || ''
+        };
+      });
+      
+      // Extraire les heures du créneau sélectionné
+      const timeSlot = timeSlotSelect.value;
+      const [heureDebut, heureFin] = timeSlot.split('-');
+      
+      // Préparer les données à envoyer
+      const data = {
+        enseignement_id: enseignement.id,
+        date: new Date().toISOString().split('T')[0], // Date d'aujourd'hui
+        heure_debut: heureDebut.replace('h', ':00'),
+        heure_fin: heureFin.replace('h', ':00'),
+        presences: presences
+      };
+      
+      // Envoyer les données
+      const response = await apiRequest('/api/teacher/attendance/save/', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+      
+      if (response.success) {
+        isSubmitted = true;
+        toast.show('Succès', response.message, 'success');
+        renderStudentsList(); // Re-render pour désactiver les contrôles
+        updateSubmitButton();
+        
+        // Désactiver le formulaire
+        classSelect.disabled = true;
+        subjectSelect.disabled = true;
+        timeSlotSelect.disabled = true;
+        
+      } else {
+        throw new Error(response.error || 'Erreur lors de l\'enregistrement');
+      }
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement:', error);
+      toast.show('Erreur', error.message, 'error');
+      
+      // Restaurer le bouton
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = 'Enregistrer l\'appel';
+    }
+  }
+
+  // Réinitialiser le formulaire
+  function resetForm() {
+    if (isSubmitted) {
+      // Si l'appel a été enregistré, recharger la page
+      if (confirm('Voulez-vous recommencer un nouvel appel ?')) {
+        window.location.reload();
+      }
       return;
     }
     
-    // Simuler l'envoi des données (attente de 1.5 secondes)
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Enregistrement...';
+    // Réinitialiser les sélections
+    classSelect.value = '';
+    subjectSelect.value = '';
+    timeSlotSelect.value = '';
     
-    setTimeout(() => {
-      isSubmitted = true;
-      
-      // Mettre à jour l'interface
-      renderStudentsList();
-      
-      // Modifier les boutons
-      resetBtn.textContent = 'Nouvel appel';
-      submitBtn.style.display = 'none';
-      
-      // Afficher un message de confirmation
-      const absentCount = absentStudents.size;
-      toast.show(
-        'Appel enregistré', 
-        `${absentCount} élève(s) absent(s) sur ${students.length}. Les parents ont été notifiés.`
-      );
-      
-      // Réactiver le bouton
-      resetBtn.disabled = false;
-    }, 1500);
-  }
-  
-  // Réinitialiser le formulaire
-  function handleFormReset() {
-    if (isSubmitted) {
-      // Si déjà soumis, préparer un nouvel appel
-      absentStudents.clear();
-      isSubmitted = false;
-      
-      // Réinitialiser les champs
-      subjectSelect.value = '';
-      timeSlotSelect.value = '';
-      students = [];
-      
-      // Réinitialiser l'interface
-      studentsList.innerHTML = `
-        <div class="placeholder-message">
-          <p>Veuillez sélectionner une classe pour afficher la liste des élèves</p>
-        </div>
-      `;
-      
-      // Rétablir les boutons
-      resetBtn.textContent = 'Réinitialiser';
-      submitBtn.style.display = 'block';
-      submitBtn.textContent = 'Enregistrer l\'appel';
-      submitBtn.disabled = false;
-      
-      // Réinitialiser la classe
-      classSelect.value = '';
-    } else {
-      // Sinon, juste réinitialiser les absences
-      absentStudents.clear();
-      renderStudentsList();
+    // Vider la liste des étudiants
+    students = [];
+    studentStatuses.clear();
+    
+    // Réinitialiser l'affichage
+    studentsList.innerHTML = `
+      <div class="placeholder-message">
+        Veuillez sélectionner une classe pour afficher la liste des élèves
+      </div>
+    `;
+    
+    // Réactiver les champs
+    classSelect.disabled = false;
+    subjectSelect.disabled = false;
+    timeSlotSelect.disabled = false;
+    
+    // Remettre les options des matières
+    while (subjectSelect.children.length > 1) {
+      subjectSelect.removeChild(subjectSelect.lastChild);
     }
+    
+    updateSubmitButton();
   }
-  
-  // Gestionnaires d'événements
+
+  // Event Listeners
   if (classSelect) {
     classSelect.addEventListener('change', function() {
-      loadStudents(this.value);
+      const selectedClass = this.value;
+      if (selectedClass) {
+        populateSubjectSelect(selectedClass);
+        loadStudents(selectedClass);
+      } else {
+        students = [];
+        studentStatuses.clear();
+        renderStudentsList();
+      }
     });
   }
-  
+
+  if (subjectSelect) {
+    subjectSelect.addEventListener('change', updateSubmitButton);
+  }
+
+  if (timeSlotSelect) {
+    timeSlotSelect.addEventListener('change', updateSubmitButton);
+  }
+
   if (attendanceForm) {
-    attendanceForm.addEventListener('submit', handleFormSubmit);
+    attendanceForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!isSubmitted) {
+        saveAttendance();
+      }
+    });
   }
-  
+
   if (resetBtn) {
-    resetBtn.addEventListener('click', handleFormReset);
+    resetBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      resetForm();
+    });
   }
-  
-  // Ajouter la fonction toggleAbsence à la portée globale pour les checkboxes
-  window.toggleAbsence = toggleAbsence;
-  
-  // Vérifier les paramètres d'URL au chargement
-  checkQueryParams();
+
+  // Fermeture du toast
+  if (toast.close) {
+    toast.close.addEventListener('click', () => {
+      toast.hide();
+    });
+  }
+
+  // Initialisation
+  loadTeacherData();
 });

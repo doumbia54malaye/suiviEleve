@@ -6,15 +6,275 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faire l'appel - École Connectée</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles CSS spécifiques pour l'appel -->
+    <style>
+      .students-list {
+        margin: 1.5rem 0;
+        min-height: 200px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        padding: 1rem;
+      }
+      
+      .placeholder-message {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 150px;
+        color: var(--gray);
+        text-align: center;
+      }
+      
+      .students-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .students-header h3 {
+        margin: 0;
+        color: var(--dark);
+      }
+      
+      .bulk-actions {
+        display: flex;
+        gap: 0.5rem;
+      }
+      
+      .students-table {
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      
+      .students-table table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .students-table th,
+      .students-table td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .students-table th {
+        background-color: var(--light);
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      
+      .student-row {
+        transition: background-color 0.2s ease;
+      }
+      
+      .student-row:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+      }
+      
+      .student-row.absent {
+        background-color: rgba(220, 53, 69, 0.1);
+      }
+      
+      .student-row.retard {
+        background-color: rgba(255, 193, 7, 0.1);
+      }
+      
+      .student-row.present {
+        background-color: rgba(25, 135, 84, 0.1);
+      }
+      
+      .status-controls {
+        white-space: nowrap;
+      }
+      
+      .status-buttons {
+        display: flex;
+        gap: 0.25rem;
+      }
+      
+      .status-btn {
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--border-color);
+        background: white;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .status-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .status-btn.present {
+        color: var(--success);
+      }
+      
+      .status-btn.present.active {
+        background-color: var(--success);
+        color: white;
+        border-color: var(--success);
+      }
+      
+      .status-btn.absent {
+        color: var(--danger);
+      }
+      
+      .status-btn.absent.active {
+        background-color: var(--danger);
+        color: white;
+        border-color: var(--danger);
+      }
+      
+      .status-btn.late {
+        color: var(--warning);
+      }
+      
+      .status-btn.late.active {
+        background-color: var(--warning);
+        color: white;
+        border-color: var(--warning);
+      }
+      
+      .status-label {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+      
+      .status-label.present {
+        background-color: var(--success);
+        color: white;
+      }
+      
+      .status-label.absent {
+        background-color: var(--danger);
+        color: white;
+      }
+      
+      .status-label.retard {
+        background-color: var(--warning);
+        color: var(--dark);
+      }
+      
+      .remarks input {
+        width: 100%;
+        min-width: 150px;
+      }
+      
+      .remark-text {
+        font-style: italic;
+        color: var(--gray);
+      }
+      
+      .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+      }
+      
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-left: 4px solid var(--primary);
+        min-width: 300px;
+        z-index: 1000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+      }
+      
+      .toast.show {
+        transform: translateX(0);
+      }
+      
+      .toast-header {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+      }
+      
+      .toast-header i {
+        margin-right: 0.5rem;
+        color: var(--primary);
+      }
+      
+      .toast-title {
+        flex: 1;
+        font-weight: 600;
+        margin: 0;
+      }
+      
+      .toast-close {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 0;
+        color: var(--gray);
+      }
+      
+      .toast-body {
+        padding: 0.75rem 1rem;
+      }
+      
+      /* Responsive */
+      @media (max-width: 768px) {
+        .students-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.5rem;
+        }
+        
+        .bulk-actions {
+          width: 100%;
+          justify-content: flex-end;
+        }
+        
+        .students-table {
+          overflow-x: auto;
+        }
+        
+        .students-table table {
+          min-width: 600px;
+        }
+        
+        .form-actions {
+          flex-direction: column;
+        }
+      }
+    </style>
   </head>
   <body>
+    <!-- Token CSRF pour les requêtes AJAX -->
+    {% csrf_token %}
+    
     <div id="app">
       <!-- Sidebar -->
       <aside class="sidebar" id="sidebar">
-        <!-- Même sidebar que dashboard.html -->
         <div class="sidebar-logo">
           <div class="logo-icon">
             <i class="fa-solid fa-school"></i>
@@ -23,11 +283,26 @@
         </div>
         
         <nav class="sidebar-menu">
-          <a href="dashboard.html" class="sidebar-link">
+          <a href="{% url 'dashboard' %}" class="sidebar-link">
             <i class="fa-solid fa-gauge"></i>
             <span>Tableau de bord</span>
           </a>
-          <div id="roleSpecificLinks"></div>
+          <a href="{% url 'attendance' %}" class="sidebar-link active">
+            <i class="fa-solid fa-user-check"></i>
+            <span>Faire l'appel</span>
+          </a>
+          <a href="{% url 'grades' %}" class="sidebar-link">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>Notes</span>
+          </a>
+          <a href="{% url 'schedule' %}" class="sidebar-link">
+            <i class="fa-solid fa-calendar"></i>
+            <span>Emploi du temps</span>
+          </a>
+          <a href="{% url 'students' %}" class="sidebar-link">
+            <i class="fa-solid fa-users"></i>
+            <span>Élèves</span>
+          </a>
         </nav>
         
         <div class="sidebar-toggle" id="sidebarToggle">
@@ -39,7 +314,6 @@
       <div class="main-content">
         <!-- Top navbar -->
         <header class="top-navbar">
-          <!-- Même navbar que dashboard.html -->
           <div class="navbar-left">
             <button class="menu-toggle" id="menuToggle">
               <i class="fa-solid fa-bars"></i>
@@ -54,22 +328,29 @@
               </button>
               <div class="notification-dropdown" id="notificationDropdown">
                 <h3>Notifications</h3>
-                <!-- Contenu des notifications -->
+                <p>Aucune nouvelle notification</p>
               </div>
             </div>
             
             <div class="user-menu">
               <button class="user-btn" id="userBtn">
                 <div class="avatar">
-                  <span id="userInitials">EC</span>
+                  <span id="userInitials">{{ user.first_name.0|default:user.username.0 }}{{ user.last_name.0|default:'' }}</span>
                 </div>
                 <div class="user-info">
-                  <span id="userName">Utilisateur</span>
-                  <span id="userRole" class="user-role">Rôle</span>
+                  <span id="userName">{{ user.get_full_name|default:user.username }}</span>
+                  <span id="userRole" class="user-role">{{ user.get_user_type_display }}</span>
                 </div>
               </button>
               <div class="user-dropdown" id="userDropdown">
-                <!-- Options du menu utilisateur -->
+                <a href="{% url 'profile' %}">
+                  <i class="fa-solid fa-user"></i>
+                  Profil
+                </a>
+                <a href="{% url 'logout' %}">
+                  <i class="fa-solid fa-sign-out-alt"></i>
+                  Déconnexion
+                </a>
               </div>
             </div>
           </div>
@@ -79,66 +360,66 @@
         <main class="content-container">
           <div class="page-header">
             <h1>Faire l'appel</h1>
+            <p>Renseignez les informations du cours et marquez la présence des élèves</p>
           </div>
           
           <div class="card">
             <div class="card-header">
-              <h2>Faire l'appel</h2>
-              <p>Renseignez les informations du cours et marquez les élèves absents</p>
+              <h2>Informations du cours</h2>
             </div>
             
             <div class="card-body">
               <form id="attendanceForm">
                 <div class="form-row">
                   <div class="form-group">
-                    <label for="class">Classe</label>
-                    <select id="class" name="class" required>
+                    <label for="class">Classe <span class="text-danger">*</span></label>
+                    <select id="class" name="class" class="form-control" required>
                       <option value="" selected disabled>Sélectionner une classe</option>
-                      <option value="6e A">6e A</option>
-                      <option value="5e B">5e B</option>
-                      <option value="4e A">4e A</option>
-                      <option value="3e C">3e C</option>
+                      <!-- Les options seront ajoutées dynamiquement par JavaScript -->
                     </select>
                   </div>
                   
                   <div class="form-group">
-                    <label for="subject">Matière</label>
-                    <select id="subject" name="subject" required>
+                    <label for="subject">Matière <span class="text-danger">*</span></label>
+                    <select id="subject" name="subject" class="form-control" required>
                       <option value="" selected disabled>Sélectionner une matière</option>
-                      <option value="Mathématiques">Mathématiques</option>
-                      <option value="Français">Français</option>
-                      <option value="Histoire-Géo">Histoire-Géo</option>
-                      <option value="Anglais">Anglais</option>
-                      <option value="SVT">SVT</option>
-                      <option value="Physique-Chimie">Physique-Chimie</option>
+                      <!-- Les options seront ajoutées dynamiquement par JavaScript -->
                     </select>
                   </div>
                   
                   <div class="form-group">
-                    <label for="timeSlot">Horaire</label>
-                    <select id="timeSlot" name="timeSlot" required>
+                    <label for="timeSlot">Horaire <span class="text-danger">*</span></label>
+                    <select id="timeSlot" name="timeSlot" class="form-control" required>
                       <option value="" selected disabled>Sélectionner un horaire</option>
-                      <option value="8h-9h">8h-9h</option>
-                      <option value="9h-10h">9h-10h</option>
-                      <option value="10h-11h">10h-11h</option>
-                      <option value="11h-12h">11h-12h</option>
-                      <option value="13h-14h">13h-14h</option>
-                      <option value="14h-15h">14h-15h</option>
-                      <option value="15h-16h">15h-16h</option>
-                      <option value="16h-17h">16h-17h</option>
+                      <option value="8h-9h">8h00 - 9h00</option>
+                      <option value="9h-10h">9h00 - 10h00</option>
+                      <option value="10h-11h">10h00 - 11h00</option>
+                      <option value="11h-12h">11h00 - 12h00</option>
+                      <option value="13h-14h">13h00 - 14h00</option>
+                      <option value="14h-15h">14h00 - 15h00</option>
+                      <option value="15h-16h">15h00 - 16h00</option>
+                      <option value="16h-17h">16h00 - 17h00</option>
                     </select>
                   </div>
                 </div>
                 
+                <!-- Liste des élèves -->
                 <div class="students-list" id="studentsList">
                   <div class="placeholder-message">
-                    Veuillez sélectionner une classe pour afficher la liste des élèves
+                    <p><i class="fa-solid fa-users"></i><br>
+                    Veuillez sélectionner une classe pour afficher la liste des élèves</p>
                   </div>
                 </div>
                 
                 <div class="form-actions">
-                  <button type="reset" class="btn btn-outline-secondary" id="resetBtn">Réinitialiser</button>
-                  <button type="submit" class="btn btn-primary" id="submitBtn">Enregistrer l'appel</button>
+                  <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    Réinitialiser
+                  </button>
+                  <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                    <i class="fa-solid fa-save"></i>
+                    Enregistrer l'appel
+                  </button>
                 </div>
               </form>
             </div>
@@ -152,11 +433,23 @@
       <div class="toast-header">
         <i class="fa-solid fa-circle-info"></i>
         <strong class="toast-title">Notification</strong>
-        <button class="toast-close">&times;</button>
+        <button class="toast-close" type="button">&times;</button>
       </div>
       <div class="toast-body">Message</div>
     </div>
     
+    <!-- Variables JavaScript pour les données utilisateur -->
+    <script>
+      // Données utilisateur pour les scripts
+      window.userData = {
+        name: "{{ user.get_full_name|default:user.username }}",
+        initials: "{{ user.first_name.0|default:user.username.0 }}{{ user.last_name.0|default:'' }}",
+        role: "{{ user.user_type }}",
+        roleDisplay: "{{ user.get_user_type_display }}"
+      };
+    </script>
+    
+    <!-- Scripts JavaScript -->
     <script src="{% static 'js/common.js' %}"></script>
     <script src="{% static 'js/attendance.js' %}"></script>
   </body>

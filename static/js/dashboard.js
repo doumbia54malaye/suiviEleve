@@ -20,6 +20,35 @@ function escapeHtml(unsafe) {
 }
 
 
+  // Fonction pour faire les requêtes API
+  async function apiRequest(url, options = {}) {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+          ...options.headers
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Erreur API:', error);
+      throw error;
+    }
+  }
+
+  // Récupérer le token CSRF
+  function getCsrfToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+           document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  }
+
   // Fonction pour charger le contenu du tableau de bord en fonction du rôle
   // Fonction pour charger le contenu du tableau de bord en fonction du rôle
   async function loadDashboardContent() {
@@ -121,81 +150,147 @@ function escapeHtml(unsafe) {
     `;
   }
   
-  // Générer le contenu du tableau de bord pour les enseignants
-  function generateTeacherDashboard() {
-    return `
-      <div class="greeting-card">
-        <div class="card">
-          <div class="card-body">
-            <h2>Bienvenue, ${userName}</h2>
-            <p>Voici un résumé de vos cours pour aujourd'hui.</p>
-          </div>
-        </div>
-      </div>
+// Générer le contenu dynamique du tableau de bord enseignant
+  async function generateTeacherDashboard() {
+    try {
+      // Récupérer les données du serveur
+      const data = await apiRequest('/api/teacher/dashboard/');
       
-      <div class="dashboard-cards">
-        <div class="card">
-          <div class="card-header">
-            <h2>Cours d'aujourd'hui</h2>
-          </div>
-          <div class="card-body">
-            <div class="schedule-item">
-              <div class="schedule-time">8h - 10h</div>
-              <div class="schedule-details">
-                <h3>Mathématiques - 5e B</h3>
-                <p>Salle 102</p>
-              </div>
-              <div class="schedule-actions">
-                <a href="attendance.html?class=5eB&time=8h-10h" class="btn btn-sm btn-primary">Faire l'appel</a>
-              </div>
-            </div>
-            <div class="schedule-item">
-              <div class="schedule-time">10h - 12h</div>
-              <div class="schedule-details">
-                <h3>Mathématiques - 3e A</h3>
-                <p>Salle 103</p>
-              </div>
-              <div class="schedule-actions">
-                <a href="attendance.html?class=3eA&time=10h-12h" class="btn btn-sm btn-primary">Faire l'appel</a>
-              </div>
-            </div>
-            <div class="schedule-item">
-              <div class="schedule-time">14h - 16h</div>
-              <div class="schedule-details">
-                <h3>Mathématiques - 4e C</h3>
-                <p>Salle 105</p>
-              </div>
-              <div class="schedule-actions">
-                <a href="attendance.html?class=4eC&time=14h-16h" class="btn btn-sm btn-primary">Faire l'appel</a>
-              </div>
+      if (!data.success) {
+        throw new Error(data.error || 'Erreur lors du chargement des données');
+      }
+
+      return `
+        <div class="greeting-card">
+          <div class="card">
+            <div class="card-body">
+              <h2>Bienvenue, ${escapeHtml(data.user_name)}</h2>
+              <p>Voici un résumé de vos cours pour aujourd'hui.</p>
             </div>
           </div>
         </div>
         
-        <div class="card">
-          <div class="card-header">
-            <h2>À faire</h2>
-          </div>
-          <div class="card-body">
-            <div class="todo-item">
-              <input type="checkbox" id="todo1">
-              <label for="todo1">Corriger les copies de 3e A</label>
+        <!-- Statistiques rapides -->
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-chalkboard-user"></i>
             </div>
-            <div class="todo-item">
-              <input type="checkbox" id="todo2">
-              <label for="todo2">Saisir les notes du contrôle de 5e B</label>
-            </div>
-            <div class="todo-item">
-              <input type="checkbox" id="todo3">
-              <label for="todo3">Préparer le prochain contrôle de 4e C</label>
+            <div class="stat-content">
+              <div class="stat-value">${data.stats.total_classes}</div>
+              <div class="stat-label">Classes</div>
             </div>
           </div>
-          <div class="card-footer">
-            <a href="grades.html" class="btn btn-outline-secondary">Saisir des notes</a>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-calendar-week"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">${data.stats.seances_semaine}</div>
+              <div class="stat-label">Séances cette semaine</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">${data.stats.seances_sans_appel}</div>
+              <div class="stat-label">Appels à faire</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fa-solid fa-clipboard-list"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value">${data.stats.notes_a_saisir}</div>
+              <div class="stat-label">Notes à saisir</div>
+            </div>
           </div>
         </div>
+        
+        <div class="dashboard-cards">
+          <div class="card">
+            <div class="card-header">
+              <h2>Cours d'aujourd'hui</h2>
+            </div>
+            <div class="card-body">
+              ${data.seances_today.length > 0 ? generateSeancesHtml(data.seances_today) : 
+                '<p class="text-muted">Aucun cours programmé pour aujourd\'hui</p>'}
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <h2>Actions rapides</h2>
+            </div>
+            <div class="card-body">
+              <div class="quick-actions">
+                <a href="attendance.html" class="quick-action-btn">
+                  <i class="fa-solid fa-user-check"></i>
+                  <span>Faire l'appel</span>
+                </a>
+                <a href="grades.html" class="quick-action-btn">
+                  <i class="fa-solid fa-clipboard-list"></i>
+                  <span>Saisir des notes</span>
+                </a>
+                <a href="schedule.html" class="quick-action-btn">
+                  <i class="fa-solid fa-calendar"></i>
+                  <span>Emploi du temps</span>
+                </a>
+                <a href="students.html" class="quick-action-btn">
+                  <i class="fa-solid fa-users"></i>
+                  <span>Mes élèves</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    } catch (error) {
+      console.error('Erreur lors du chargement du dashboard:', error);
+      return `
+        <div class="card">
+          <div class="card-body">
+            <div class="alert alert-danger">
+              <i class="fa-solid fa-exclamation-triangle"></i>
+              Erreur lors du chargement des données: ${escapeHtml(error.message)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Générer le HTML pour les séances
+  function generateSeancesHtml(seances) {
+    return seances.map(seance => `
+      <div class="schedule-item">
+        <div class="schedule-time">${seance.heure_debut} - ${seance.heure_fin}</div>
+        <div class="schedule-details">
+          <h3>${escapeHtml(seance.matiere)} - ${escapeHtml(seance.classe)}</h3>
+          ${seance.description ? `<p>${escapeHtml(seance.description)}</p>` : ''}
+          ${seance.appel_fait ? 
+            '<span class="badge badge-success">Appel fait</span>' : 
+            '<span class="badge badge-warning">Appel à faire</span>'
+          }
+        </div>
+        <div class="schedule-actions">
+          ${!seance.appel_fait ? 
+            `<a href="attendance.html?seance_id=${seance.id}" class="btn btn-sm btn-primary">
+              <i class="fa-solid fa-user-check"></i> Faire l'appel
+            </a>` : 
+            `<a href="attendance.html?seance_id=${seance.id}&view=1" class="btn btn-sm btn-outline-primary">
+              <i class="fa-solid fa-eye"></i> Voir l'appel
+            </a>`
+          }
+        </div>
       </div>
-    `;
+    `).join('');
   }
   
   // Générer le contenu du tableau de bord pour les administrateurs
