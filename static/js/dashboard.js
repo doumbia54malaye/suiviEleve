@@ -230,7 +230,7 @@ function escapeHtml(unsafe) {
             </div>
             <div class="card-body">
               <div class="quick-actions">
-                <a href="attendance.html" class="quick-action-btn">
+                <a href="/attendance/" class="quick-action-btn">
                   <i class="fa-solid fa-user-check"></i>
                   <span>Faire l'appel</span>
                 </a>

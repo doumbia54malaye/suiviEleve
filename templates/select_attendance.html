@@ -1,0 +1,21 @@
+{% extends "base.html" %} <!-- Adaptez à votre template de base -->
+
+{% block content %}
+<div class="container">
+    <h1>Choisir un cours pour faire l'appel</h1>
+    
+    {% if enseignements %}
+        <div class="list-group">
+            {% for enseignement in enseignements %}
+                <a href="{% url 'teacher_attendance' enseignement.id %}" class="list-group-item list-group-item-action">
+                    {{ enseignement.matiere.nom }} - {{ enseignement.classe.nom }}
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Vous n'êtes associé à aucun enseignement.</p>
+    {% endif %}
+
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary mt-3">Retour au tableau de bord</a>
+</div>
+{% endblock %}

@@ -283,23 +283,23 @@
         </div>
         
         <nav class="sidebar-menu">
-          <a href="{% url 'dashboard' %}" class="sidebar-link">
+          <a href="{% url 'gestionAbst:dashboard' %}" class="sidebar-link">
             <i class="fa-solid fa-gauge"></i>
             <span>Tableau de bord</span>
           </a>
-          <a href="{% url 'attendance' %}" class="sidebar-link active">
+          <a href="#" class="sidebar-link active">
             <i class="fa-solid fa-user-check"></i>
             <span>Faire l'appel</span>
           </a>
-          <a href="{% url 'grades' %}" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-clipboard-list"></i>
             <span>Notes</span>
           </a>
-          <a href="{% url 'schedule' %}" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-calendar"></i>
             <span>Emploi du temps</span>
           </a>
-          <a href="{% url 'students' %}" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-users"></i>
             <span>Élèves</span>
           </a>
@@ -343,11 +343,11 @@
                 </div>
               </button>
               <div class="user-dropdown" id="userDropdown">
-                <a href="{% url 'profile' %}">
+                <a href="#">
                   <i class="fa-solid fa-user"></i>
                   Profil
                 </a>
-                <a href="{% url 'logout' %}">
+                <a href="{% url 'gestionAbst:logout' %}">
                   <i class="fa-solid fa-sign-out-alt"></i>
                   Déconnexion
                 </a>

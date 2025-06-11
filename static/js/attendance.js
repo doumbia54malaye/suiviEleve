@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
         throw new Error('Classe non trouvée dans vos enseignements');
       }
       
-      const data = await apiRequest(`/api/teacher/classes/students/?classe_id=${enseignement.id}`);
+      const data = await apiRequest(`/api/teacher/classes/students/?enseignement_id=${enseignement.id}`);
       
       if (data.success) {
         students = data.eleves;

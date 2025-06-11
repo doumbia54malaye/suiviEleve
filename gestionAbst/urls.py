@@ -68,6 +68,9 @@ urlpatterns = [
     path('api/teacher/dashboard/', views.teacher_dashboard_data, name='teacher_dashboard_data'),
     path('api/teacher/classes/students/', views.teacher_classes_students, name='teacher_classes_students'),
     path('api/teacher/attendance/save/', views.save_attendance, name='save_attendance'),
+    path('attendance/', views.vue_teacher_attendance, name='teacher_attendance'),
+     path('attendance/<int:enseignement_id>/', views.vue_teacher_attendance, name='teacher_attendance'),
+  
 
     # Gestion des séances
     path('seances/', views.seance_list, name='seance_list'),

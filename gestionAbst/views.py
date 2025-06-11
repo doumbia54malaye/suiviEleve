@@ -87,9 +87,6 @@ def note_create(request):
 def eleve_notes(request, eleve_id):
     return HttpResponse(f"Page des notes de l'élève {eleve_id} (à implémenter)")
 
-# --- Vues pour les API (à développer) ---
-def save_attendance(request):
-    return JsonResponse({'message': 'API sauvegarde présence (à implémenter)'}) # JsonResponse si c'est une API
 
 def save_grade(request):
     return JsonResponse({'message': 'API sauvegarde note (à implémenter)'}) # JsonResponse si c'est une API
@@ -826,6 +823,11 @@ def statistiques_utilisateurs(request):
 #--------------------------------------------------------------------------------
 #----------------------------espace enseignant------------------------------------
 #--------------------------------------------------------------------------------
+def vue_teacher_attendance(request):
+    """Vue pour afficher l'interface d'appel pour un enseignement spécifique"""
+
+    return render(request, 'attendance.html')
+
 @login_required
 @require_http_methods(["GET"])
 def teacher_dashboard_data(request):
@@ -900,48 +902,58 @@ def teacher_dashboard_data(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+@login_required
+
 
 @login_required
 @require_http_methods(["GET"])
 def teacher_classes_students(request):
-    """API pour récupérer les élèves d'une classe"""
-    classe_id = request.GET.get('classe_id')
+    """API pour récupérer les élèves d'un enseignement spécifique"""
+    # Étape 1 : Récupérer le bon paramètre
+    enseignement_id = request.GET.get('enseignement_id') # <-- Changement ici
     
-    if not classe_id:
-        return JsonResponse({'error': 'ID de classe requis'}, status=400)
+    if not enseignement_id:
+        # Erreur si le paramètre est manquant
+        return JsonResponse({'success': False, 'error': 'ID d\'enseignement requis'}, status=400)
     
     try:
-        # Vérifier que l'enseignant a accès à cette classe
-        enseignement = Enseignement.objects.filter(
-            enseignant=request.user,
-            classe_id=classe_id,
-            annee_scolaire='2024-2025'
-        ).first()
+        # Étape 2 : Trouver l'enseignement par son ID et vérifier qu'il appartient bien à l'enseignant connecté
+        enseignement = Enseignement.objects.get(
+            id=enseignement_id,
+            enseignant=request.user
+        )
         
-        if not enseignement:
-            return JsonResponse({'error': 'Accès non autorisé à cette classe'}, status=403)
-        
-        # Récupérer les élèves de la classe
-        eleves = Eleve.objects.filter(classe_id=classe_id).order_by('nom', 'prenom')
+        # Si on arrive ici, l'enseignement existe et l'enseignant a le droit d'y accéder.
+        # Plus besoin du .filter().first() et du check if not enseignement. .get() le fait pour nous.
+
+        # Étape 3 : Récupérer la classe de cet enseignement et ensuite les élèves
+        classe_de_l_enseignement = enseignement.classe
+        eleves = Eleve.objects.filter(classe=classe_de_l_enseignement).order_by('nom', 'prenoms')
         
         eleves_data = [
             {
                 'id': eleve.id,
                 'nom': eleve.nom,
-                'prenom': eleve.prenom,
-                'numero_ordre': eleve.numero_ordre if hasattr(eleve, 'numero_ordre') else None
+                'prenom': eleve.prenoms,
+                # Utiliser getattr est plus sûr que hasattr + accès direct
+                'numero_ordre': getattr(eleve, 'numero_ordre', None)
             } for eleve in eleves
         ]
         
         return JsonResponse({
             'success': True,
             'eleves': eleves_data,
-            'classe_nom': enseignement.classe.nom
+            'classe_nom': classe_de_l_enseignement.nom
         })
+
+    except Enseignement.DoesNotExist:
+        # Si .get() ne trouve rien, il lève cette erreur
+        return JsonResponse({'success': False, 'error': 'Enseignement non trouvé ou accès non autorisé'}, status=404)
         
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
+        # Pour le débogage, c'est bien de voir l'erreur dans la console du serveur
+        print(f"Erreur inattendue dans teacher_classes_students: {e}") 
+        return JsonResponse({'success': False, 'error': 'Une erreur interne est survenue.'}, status=500)
 @login_required
 @require_http_methods(["POST"])
 def save_attendance(request):
