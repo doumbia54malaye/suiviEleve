@@ -1,0 +1,105 @@
+/* Corrections CSS à ajouter à votre fichier de styles */
+
+.status-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-color);
+  background: white;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.status-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* États des boutons */
+.status-btn.present {
+  color: #198754;
+  border-color: #198754;
+}
+
+.status-btn.present:hover,
+.status-btn.present.active {
+  background-color: #198754;
+  color: white;
+  border-color: #198754;
+}
+
+.status-btn.absent {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.status-btn.absent:hover,
+.status-btn.absent.active {
+  background-color: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}
+
+.status-btn.late {
+  color: #ffc107;
+  border-color: #ffc107;
+}
+
+.status-btn.late:hover,
+.status-btn.late.active {
+  background-color: #ffc107;
+  color: #000;
+  border-color: #ffc107;
+}
+
+/* Amélioration de l'affichage des lignes d'élèves */
+.student-row {
+  transition: all 0.2s ease;
+}
+
+.student-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.student-row.present {
+  background-color: rgba(25, 135, 84, 0.05);
+  border-left: 3px solid #198754;
+}
+
+.student-row.absent {
+  background-color: rgba(220, 53, 69, 0.05);
+  border-left: 3px solid #dc3545;
+}
+
+.student-row.retard {
+  background-color: rgba(255, 193, 7, 0.05);
+  border-left: 3px solid #ffc107;
+}
+
+/* Amélioration du responsive */
+@media (max-width: 768px) {
+  .status-buttons {
+    gap: 0.125rem;
+  }
+  
+  .status-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+}
+
+/* Animation pour les changements de statut */
+.student-row.status-changing {
+  animation: statusChange 0.3s ease;
+}
+
+@keyframes statusChange {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+  100% { transform: scale(1); }
+}

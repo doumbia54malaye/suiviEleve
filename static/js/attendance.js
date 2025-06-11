@@ -1,4 +1,4 @@
-// attendance.js - Version dynamique avec API
+// attendance.js - Version corrigée avec gestion des événements
 document.addEventListener('DOMContentLoaded', function() {
   const attendanceForm = document.getElementById('attendanceForm');
   const classSelect = document.getElementById('class');
@@ -193,10 +193,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <h3>Liste des élèves (${students.length})</h3>
         ${!isSubmitted ? `
           <div class="bulk-actions">
-            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="markAllPresent()">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="markAllPresentBtn">
               Tous présents
             </button>
-            <button type="button" class="btn btn-sm btn-outline-warning" onclick="markAllAbsent()">
+            <button type="button" class="btn btn-sm btn-outline-warning" id="markAllAbsentBtn">
               Tous absents
             </button>
           </div>
@@ -230,19 +230,22 @@ document.addEventListener('DOMContentLoaded', function() {
               <div class="status-buttons">
                 <button type="button" 
                         class="status-btn present ${isPresent ? 'active' : ''}" 
-                        onclick="updateStudentStatus(${student.id}, 'present')"
+                        data-student-id="${student.id}"
+                        data-status="present"
                         title="Présent">
                   <i class="fa-solid fa-check"></i>
                 </button>
                 <button type="button" 
                         class="status-btn absent ${isAbsent ? 'active' : ''}" 
-                        onclick="updateStudentStatus(${student.id}, 'absent')"
+                        data-student-id="${student.id}"
+                        data-status="absent"
                         title="Absent">
                   <i class="fa-solid fa-times"></i>
                 </button>
                 <button type="button" 
                         class="status-btn late ${isLate ? 'active' : ''}" 
-                        onclick="updateStudentStatus(${student.id}, 'retard')"
+                        data-student-id="${student.id}"
+                        data-status="retard"
                         title="Retard">
                   <i class="fa-solid fa-clock"></i>
                 </button>
@@ -256,10 +259,10 @@ document.addEventListener('DOMContentLoaded', function() {
           <td class="remarks">
             ${!isSubmitted ? `
               <input type="text" 
-                     class="form-control form-control-sm" 
+                     class="form-control form-control-sm remark-input" 
                      placeholder="Remarques..."
                      value="${status.remarque}"
-                     onchange="updateStudentRemarks(${student.id}, this.value)">
+                     data-student-id="${student.id}">
             ` : `
               <span class="remark-text">${status.remarque || '-'}</span>
             `}
@@ -275,11 +278,51 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
 
     studentsList.innerHTML = html;
+    
+    // Ajouter les event listeners pour les nouveaux éléments
+    addEventListenersToStudentsList();
     updateSubmitButton();
+  }
+
+  // Ajouter les event listeners aux éléments de la liste des élèves
+  function addEventListenersToStudentsList() {
+    // Event listeners pour les boutons de statut
+    const statusButtons = studentsList.querySelectorAll('.status-btn');
+    statusButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const studentId = parseInt(this.dataset.studentId);
+        const status = this.dataset.status;
+        updateStudentStatus(studentId, status);
+      });
+    });
+
+    // Event listeners pour les champs de remarques
+    const remarkInputs = studentsList.querySelectorAll('.remark-input');
+    remarkInputs.forEach(input => {
+      input.addEventListener('change', function() {
+        const studentId = parseInt(this.dataset.studentId);
+        updateStudentRemarks(studentId, this.value);
+      });
+    });
+
+    // Event listeners pour les boutons en masse
+    const markAllPresentBtn = document.getElementById('markAllPresentBtn');
+    const markAllAbsentBtn = document.getElementById('markAllAbsentBtn');
+    
+    if (markAllPresentBtn) {
+      markAllPresentBtn.addEventListener('click', markAllPresent);
+    }
+    
+    if (markAllAbsentBtn) {
+      markAllAbsentBtn.addEventListener('click', markAllAbsent);
+    }
   }
 
   // Mettre à jour le statut d'un élève
   function updateStudentStatus(studentId, newStatus) {
+    console.log('Mise à jour du statut:', studentId, newStatus); // Debug
+    
     const currentStatus = studentStatuses.get(studentId);
     studentStatuses.set(studentId, {
       ...currentStatus,
@@ -295,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const buttons = row.querySelectorAll('.status-btn');
       buttons.forEach(btn => {
         btn.classList.remove('active');
-        if (btn.classList.contains(newStatus === 'retard' ? 'late' : newStatus)) {
+        if (btn.dataset.status === newStatus) {
           btn.classList.add('active');
         }
       });
@@ -306,6 +349,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Mettre à jour les remarques d'un élève
   function updateStudentRemarks(studentId, remarks) {
+    console.log('Mise à jour des remarques:', studentId, remarks); // Debug
+    
     const currentStatus = studentStatuses.get(studentId);
     studentStatuses.set(studentId, {
       ...currentStatus,
@@ -324,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Marquer tous les élèves comme présents
-  window.markAllPresent = function() {
+  function markAllPresent() {
     students.forEach(student => {
       studentStatuses.set(student.id, {
         ...studentStatuses.get(student.id),
@@ -332,10 +377,10 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     renderStudentsList();
-  };
+  }
 
   // Marquer tous les élèves comme absents
-  window.markAllAbsent = function() {
+  function markAllAbsent() {
     students.forEach(student => {
       studentStatuses.set(student.id, {
         ...studentStatuses.get(student.id),
@@ -343,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
     renderStudentsList();
-  };
+  }
 
   // Mettre à jour l'état du bouton de soumission
   function updateSubmitButton() {
@@ -401,6 +446,8 @@ document.addEventListener('DOMContentLoaded', function() {
         presences: presences
       };
       
+      console.log('Données à envoyer:', data); // Debug
+      
       // Envoyer les données
       const response = await apiRequest('/api/teacher/attendance/save/', {
         method: 'POST',
@@ -428,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Restaurer le bouton
       submitBtn.disabled = false;
-      submitBtn.innerHTML = 'Enregistrer l\'appel';
+      submitBtn.innerHTML = '<i class="fa-solid fa-save"></i> Enregistrer l\'appel';
     }
   }
 
@@ -454,7 +501,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Réinitialiser l'affichage
     studentsList.innerHTML = `
       <div class="placeholder-message">
-        Veuillez sélectionner une classe pour afficher la liste des élèves
+        <p><i class="fa-solid fa-users"></i><br>
+        Veuillez sélectionner une classe pour afficher la liste des élèves</p>
       </div>
     `;
     
@@ -471,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateSubmitButton();
   }
 
-  // Event Listeners
+  // Event Listeners principaux
   if (classSelect) {
     classSelect.addEventListener('change', function() {
       const selectedClass = this.value;

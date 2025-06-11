@@ -9,11 +9,13 @@ from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
+import datetime as dt
+
+
 from .models import *
 from .forms import *
 import json
@@ -825,7 +827,6 @@ def statistiques_utilisateurs(request):
 #--------------------------------------------------------------------------------
 def vue_teacher_attendance(request):
     """Vue pour afficher l'interface d'appel pour un enseignement spécifique"""
-
     return render(request, 'attendance.html')
 
 @login_required
@@ -902,121 +903,152 @@ def teacher_dashboard_data(request):
         
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 @login_required
+@require_http_methods(["POST"])
+@login_required
+@require_http_methods(["POST"])
+def save_attendance(request):
+    """API pour enregistrer l'appel d'une séance"""
+    if request.user.user_type != 'teacher':
+        return JsonResponse({'error': 'Accès non autorisé'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # 1. Validation des données reçues du frontend
+        required_fields = ['enseignement_id', 'date', 'heure_debut', 'heure_fin', 'presences']
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({'error': f'Champ requis manquant: {field}'}, status=400)
+        
+        # 2. Vérification de l'enseignement
+        try:
+            enseignement = Enseignement.objects.get(
+                id=data['enseignement_id'],
+                enseignant=request.user
+            )
+        except Enseignement.DoesNotExist:
+            return JsonResponse({'error': 'Enseignement non trouvé ou accès non autorisé'}, status=404)
+        
+        # 3. Traitement de la date et des heures (avec l'alias 'dt')
+        try:
+            date_cours = dt.datetime.strptime(data['date'], '%Y-%m-%d').date()
+            heure_debut = dt.datetime.strptime(data['heure_debut'], '%H:%M').time()
+            heure_fin = dt.datetime.strptime(data['heure_fin'], '%H:%M').time()
+        except ValueError as e:
+            # On renvoie une erreur plus précise si le format est mauvais
+            return JsonResponse({'error': f'Format de date ou d\'heure invalide: {e}'}, status=400)
 
+        # 4. Création ou récupération de la séance
+        seance, created = Seance.objects.get_or_create(
+            enseignement=enseignement,
+            date=date_cours,
+            heure_debut=heure_debut,
+            heure_fin=heure_fin,
+            defaults={
+                'description': f'Cours de {enseignement.matiere.nom} - {enseignement.classe.nom}',
+                'appel_fait': False
+            }
+        )
+        
+        if seance.appel_fait and not created:
+            return JsonResponse({'error': 'L\'appel a déjà été enregistré pour cette séance'}, status=400)
+        
+        # 5. Traitement des présences
+        presences_data = data.get('presences', [])
+        if not presences_data:
+            return JsonResponse({'error': 'Aucune donnée de présence fournie'}, status=400)
+        
+        # On supprime les anciennes présences pour cette séance pour éviter les doublons
+        Presence.objects.filter(seance=seance).delete()
+        
+        presences_to_create = []
+        eleves_in_class_ids = set(Eleve.objects.filter(classe=enseignement.classe).values_list('id', flat=True))
+        
+        for p_data in presences_data:
+            eleve_id = p_data.get('eleve_id')
+            if eleve_id in eleves_in_class_ids:
+                presences_to_create.append(
+                    Presence(
+                        seance=seance,
+                        eleve_id=eleve_id,
+                        statut=p_data.get('statut', 'present'),
+                        remarque=p_data.get('remarque', '')
+                    )
+                )
+        
+        if presences_to_create:
+            Presence.objects.bulk_create(presences_to_create)
+        
+        # 6. Finalisation
+        seance.appel_fait = True
+        seance.save()
+        
+        # 7. Préparation de la réponse de succès
+        total_eleves = len(presences_to_create)
+        presents = sum(1 for p in presences_to_create if p.statut == 'present')
+        absents = sum(1 for p in presences_to_create if p.statut == 'absent')
+        retards = sum(1 for p in presences_to_create if p.statut == 'retard')
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'Appel enregistré avec succès pour {total_eleves} élèves.',
+            'seance_id': seance.id,
+            'stats': {
+                'total': total_eleves,
+                'presents': presents,
+                'absents': absents,
+                'retards': retards
+            }
+        }, status=200)
 
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Données JSON invalides reçues'}, status=400)
+    except Exception as e:
+        print(f"Erreur INATTENDUE dans save_attendance: {e}") # Pour le débogage
+        return JsonResponse({'error': 'Une erreur interne est survenue sur le serveur.'}, status=500)
 @login_required
 @require_http_methods(["GET"])
 def teacher_classes_students(request):
-    """API pour récupérer les élèves d'un enseignement spécifique"""
-    # Étape 1 : Récupérer le bon paramètre
-    enseignement_id = request.GET.get('enseignement_id') # <-- Changement ici
-    
-    if not enseignement_id:
-        # Erreur si le paramètre est manquant
-        return JsonResponse({'success': False, 'error': 'ID d\'enseignement requis'}, status=400)
+    """API pour récupérer les élèves d'une classe pour un enseignement"""
+    if request.user.user_type != 'teacher':
+        return JsonResponse({'error': 'Accès non autorisé'}, status=403)
     
     try:
-        # Étape 2 : Trouver l'enseignement par son ID et vérifier qu'il appartient bien à l'enseignant connecté
-        enseignement = Enseignement.objects.get(
-            id=enseignement_id,
-            enseignant=request.user
-        )
+        enseignement_id = request.GET.get('enseignement_id')
+        if not enseignement_id:
+            return JsonResponse({'error': 'ID enseignement requis'}, status=400)
         
-        # Si on arrive ici, l'enseignement existe et l'enseignant a le droit d'y accéder.
-        # Plus besoin du .filter().first() et du check if not enseignement. .get() le fait pour nous.
-
-        # Étape 3 : Récupérer la classe de cet enseignement et ensuite les élèves
-        classe_de_l_enseignement = enseignement.classe
-        eleves = Eleve.objects.filter(classe=classe_de_l_enseignement).order_by('nom', 'prenoms')
+        # Vérifier que l'enseignement appartient à l'enseignant connecté
+        try:
+            enseignement = Enseignement.objects.get(
+                id=enseignement_id,
+                enseignant=request.user
+            )
+        except Enseignement.DoesNotExist:
+            return JsonResponse({'error': 'Enseignement non trouvé ou accès non autorisé'}, status=404)
+        
+        # Récupérer les élèves de la classe
+        eleves = Eleve.objects.filter(classe=enseignement.classe).order_by('nom', 'prenoms')
         
         eleves_data = [
             {
                 'id': eleve.id,
                 'nom': eleve.nom,
                 'prenom': eleve.prenoms,
-                # Utiliser getattr est plus sûr que hasattr + accès direct
-                'numero_ordre': getattr(eleve, 'numero_ordre', None)
+                'numero': getattr(eleve, 'numero', None)  # Si vous avez un champ numero
             } for eleve in eleves
         ]
         
         return JsonResponse({
             'success': True,
             'eleves': eleves_data,
-            'classe_nom': classe_de_l_enseignement.nom
-        })
-
-    except Enseignement.DoesNotExist:
-        # Si .get() ne trouve rien, il lève cette erreur
-        return JsonResponse({'success': False, 'error': 'Enseignement non trouvé ou accès non autorisé'}, status=404)
-        
-    except Exception as e:
-        # Pour le débogage, c'est bien de voir l'erreur dans la console du serveur
-        print(f"Erreur inattendue dans teacher_classes_students: {e}") 
-        return JsonResponse({'success': False, 'error': 'Une erreur interne est survenue.'}, status=500)
-@login_required
-@require_http_methods(["POST"])
-def save_attendance(request):
-    """API pour enregistrer l'appel"""
-    if request.user.user_type != 'teacher':
-        return JsonResponse({'error': 'Accès non autorisé'}, status=403)
-    
-    try:
-        data = json.loads(request.body)
-        enseignement_id = data.get('enseignement_id')
-        date_seance = data.get('date')
-        heure_debut = data.get('heure_debut')
-        heure_fin = data.get('heure_fin')
-        presences = data.get('presences', [])
-        
-        # Vérifier l'enseignement
-        enseignement = Enseignement.objects.filter(
-            id=enseignement_id,
-            enseignant=request.user
-        ).first()
-        
-        if not enseignement:
-            return JsonResponse({'error': 'Enseignement non trouvé'}, status=404)
-        
-        # Créer ou récupérer la séance
-        seance, created = Seance.objects.get_or_create(
-            enseignement=enseignement,
-            date=datetime.strptime(date_seance, '%Y-%m-%d').date(),
-            heure_debut=datetime.strptime(heure_debut, '%H:%M').time(),
-            defaults={
-                'heure_fin': datetime.strptime(heure_fin, '%H:%M').time(),
-                'appel_fait': True
-            }
-        )
-        
-        if not created:
-            seance.appel_fait = True
-            seance.save()
-        
-        # Enregistrer les présences
-        for presence_data in presences:
-            eleve_id = presence_data.get('eleve_id')
-            statut = presence_data.get('statut', 'present')
-            remarque = presence_data.get('remarque', '')
-            
-            Presence.objects.update_or_create(
-                seance=seance,
-                eleve_id=eleve_id,
-                defaults={
-                    'statut': statut,
-                    'remarque': remarque
-                }
-            )
-        
-        # Compter les absents pour le retour
-        absents_count = len([p for p in presences if p.get('statut') == 'absent'])
-        
-        return JsonResponse({
-            'success': True,
-            'message': f'Appel enregistré avec succès. {absents_count} élève(s) absent(s).',
-            'seance_id': seance.id,
-            'absents_count': absents_count
+            'classe': enseignement.classe.nom,
+            'matiere': enseignement.matiere.nom
         })
         
     except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
+        print(f"Erreur dans teacher_classes_students: {e}")
+        return JsonResponse({'error': 'Une erreur interne est survenue'}, status=500)
+  
