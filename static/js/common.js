@@ -99,11 +99,11 @@ document.addEventListener('DOMContentLoaded', function() {
         break;
       case 'teacher':
         links = `
-          <a href="attendance.html" class="sidebar-link">
+          <a href="attendance/" class="sidebar-link">
             <i class="fa-solid fa-clipboard-check"></i>
             <span>Faire l'appel</span>
           </a>
-          <a href="grades.html" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-pen-to-square"></i>
             <span>Saisir les notes</span>
           </a>
@@ -123,19 +123,19 @@ document.addEventListener('DOMContentLoaded', function() {
             <i class="fa-solid fa-chalkboard-teacher"></i>
             <span>Enseignants</span>
           </a>
-          <a href="class-management.html" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-book-open"></i>
             <span>Classes</span>
           </a>
-          <a href="schedule-management.html" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-calendar-days"></i>
             <span>Emplois du temps</span>
           </a>
-          <a href="statistics.html" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-chart-bar"></i>
             <span>Statistiques</span>
           </a>
-          <a href="settings.html" class="sidebar-link">
+          <a href="#" class="sidebar-link">
             <i class="fa-solid fa-cog"></i>
             <span>Paramètres</span>
           </a>

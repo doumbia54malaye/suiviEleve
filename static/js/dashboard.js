@@ -400,7 +400,7 @@ function escapeHtml(unsafe) {
                   <i class="fa-solid fa-users-cog"></i>
                   <span>Gérer Utilisateurs</span>
                 </a>
-                <a href="/admin/gestion/classe/add/" class="quick-action-btn">
+                <a href="#" class="quick-action-btn">
                   <i class="fa-solid fa-plus"></i>
                   <span>Créer une classe</span>
                 </a>

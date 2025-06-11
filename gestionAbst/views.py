@@ -383,8 +383,6 @@ def liste_eleves(request):
         'title': 'Gestion des Élèves',
         'eleves': eleves,
         'classes': classes,
-        # On renvoie les valeurs des filtres au template pour qu'il puisse
-        # pré-remplir les champs du formulaire.
         'classe_selectionnee': classe_selectionnee,
         'statut_selectionne': statut_selectionne,
     }
