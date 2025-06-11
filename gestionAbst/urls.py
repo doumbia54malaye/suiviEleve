@@ -70,7 +70,7 @@ urlpatterns = [
      path('attendance/<int:enseignement_id>/', views.vue_teacher_attendance, name='teacher_attendance'),
     path('api/teacher/attendance/save/', views.save_attendance, name='save_attendance'),
     path('api/teacher/classes/students/', views.teacher_classes_students, name='teacher_classes_students'),
-
+    path('api/teacher/attendance/details/<int:seance_id>/', views.get_attendance_details, name='get_attendance_details'),
     # Gestion des séances
     path('seances/', views.seance_list, name='seance_list'),
     path('seances/create/', views.seance_create, name='seance_create'),

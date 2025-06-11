@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
            document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   }
 
+
   // Charger les enseignements de l'enseignant
   async function loadTeacherData() {
     try {
@@ -134,7 +135,85 @@ document.addEventListener('DOMContentLoaded', function() {
     // Réinitialiser la sélection
     subjectSelect.value = '';
   }
+// Fonction pour lire les paramètres de l'URL
+function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        seance_id: params.get('seance_id'),
+        view_mode: params.get('view') === '1'
+    };
+}
 
+// Nouvelle fonction pour afficher les détails d'un appel
+async function displayAttendanceDetails(seanceId) {
+    try {
+        // Appeler la nouvelle API
+        const data = await apiRequest(`/api/teacher/attendance/details/${seanceId}/`);
+
+        if (data.success) {
+            // Mettre à jour l'interface en mode "lecture seule"
+            document.querySelector('.page-header h1').textContent = "Détails de l'appel";
+            
+            // Désactiver les sélecteurs
+            classSelect.disabled = true;
+            subjectSelect.disabled = true;
+            timeSlotSelect.disabled = true;
+
+            // Remplir et sélectionner les valeurs
+            classSelect.innerHTML = `<option>${data.enseignement.classe}</option>`;
+            subjectSelect.innerHTML = `<option>${data.enseignement.matiere}</option>`;
+            const timeSlotValue = `${data.seance.heure_debut.substring(0,2)}h-${data.seance.heure_fin.substring(0,2)}h`;
+            timeSlotSelect.innerHTML = `<option value="${timeSlotValue}">${data.seance.heure_debut} - ${data.seance.heure_fin}</option>`;
+
+            // Mettre à jour la liste des élèves avec les statuts enregistrés
+            students = data.presences.map(p => ({
+                id: p.eleve_id,
+                nom: p.nom,
+                prenom: p.prenom
+            }));
+
+            // Stocker les statuts
+            studentStatuses.clear();
+            data.presences.forEach(p => {
+                studentStatuses.set(p.eleve_id, {
+                    statut: p.statut,
+                    remarque: p.remarque
+                });
+            });
+
+            isSubmitted = true; // Pour que renderStudentsList s'affiche en mode lecture seule
+            renderStudentsList(); // Affiche la liste des élèves
+            
+            // Mettre à jour les boutons d'action
+            submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Appel déjà enregistré';
+            submitBtn.disabled = true;
+            resetBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i> Retour';
+            resetBtn.onclick = () => { window.location.href = '/dashboard/'; }; // Redirige vers le dashboard
+
+        } else {
+            throw new Error(data.error);
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération des détails de l'appel:", error);
+        toast.show('Erreur', 'Impossible de charger les détails de cet appel.', 'error');
+        studentsList.innerHTML = `<div class="placeholder-message"><p class="text-danger">${error.message}</p></div>`;
+    }
+}
+
+
+// La fonction d'initialisation qui choisit quoi faire
+async function initializePage() {
+    const params = getUrlParams();
+    console.log("Paramètres d'URL détectés :", params);
+
+    if (params.seance_id && params.view_mode) {
+        // On est en mode "visualisation"
+        await displayAttendanceDetails(params.seance_id);
+    } else {
+        // Comportement normal : charger les données pour faire un nouvel appel.
+        await loadTeacherData();
+    }
+}
   // Charger les élèves pour une classe
   async function loadStudents(className) {
     if (!className) return;
@@ -566,5 +645,5 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Initialisation
-  loadTeacherData();
+   initializePage();
 });

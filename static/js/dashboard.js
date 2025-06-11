@@ -284,9 +284,9 @@ function escapeHtml(unsafe) {
             `<a href="attendance.html?seance_id=${seance.id}" class="btn btn-sm btn-primary">
               <i class="fa-solid fa-user-check"></i> Faire l'appel
             </a>` : 
-            `<a href="attendance.html?seance_id=${seance.id}&view=1" class="btn btn-sm btn-outline-primary">
-              <i class="fa-solid fa-eye"></i> Voir l'appel
-            </a>`
+            `  <a href="/attendance/?seance_id=${seance.id}&view=1" class="btn btn-sm btn-info">
+            <i class="fa-solid fa-eye"></i> Voir l'appel
+        </a>`
           }
         </div>
       </div>

@@ -906,8 +906,6 @@ def teacher_dashboard_data(request):
 
 @login_required
 @require_http_methods(["POST"])
-@login_required
-@require_http_methods(["POST"])
 def save_attendance(request):
     """API pour enregistrer l'appel d'une séance"""
     if request.user.user_type != 'teacher':
@@ -1051,4 +1049,53 @@ def teacher_classes_students(request):
     except Exception as e:
         print(f"Erreur dans teacher_classes_students: {e}")
         return JsonResponse({'error': 'Une erreur interne est survenue'}, status=500)
-  
+@login_required
+@require_http_methods(["GET"])
+def get_attendance_details(request, seance_id):
+    """API pour récupérer les détails d'un appel déjà effectué."""
+    if request.user.user_type != 'teacher':
+        return JsonResponse({'error': 'Accès non autorisé'}, status=403)
+
+    try:
+        # 1. Récupérer la séance et s'assurer qu'elle appartient à l'enseignant
+        seance = get_object_or_404(
+            Seance.objects.select_related('enseignement__classe', 'enseignement__matiere'),
+            id=seance_id,
+            enseignement__enseignant=request.user
+        )
+
+        # 2. Récupérer toutes les présences pour cette séance
+        presences = Presence.objects.filter(seance=seance).select_related('eleve')
+
+        # 3. Formater les données pour la réponse JSON
+        presences_data = []
+        for p in presences:
+            presences_data.append({
+                'eleve_id': p.eleve.id,
+                'nom': p.eleve.nom,
+                'prenom': p.eleve.prenoms,
+                'statut': p.statut,
+                'remarque': p.remarque
+            })
+        
+        data = {
+            'success': True,
+            'enseignement': {
+                'id': seance.enseignement.id,
+                'classe': seance.enseignement.classe.nom,
+                'matiere': seance.enseignement.matiere.nom,
+            },
+            'seance': {
+                'id': seance.id,
+                'date': seance.date.strftime('%Y-%m-%d'),
+                'heure_debut': seance.heure_debut.strftime('%H:%M'),
+                'heure_fin': seance.heure_fin.strftime('%H:%M')
+            },
+            'presences': presences_data
+        }
+        return JsonResponse(data)
+
+    except Seance.DoesNotExist:
+        return JsonResponse({'error': 'Séance non trouvée ou accès non autorisé'}, status=404)
+    except Exception as e:
+        return JsonResponse({'error': f'Erreur interne du serveur: {e}'}, status=500) 
