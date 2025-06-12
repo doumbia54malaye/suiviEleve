@@ -131,15 +131,14 @@ body {
 .card-body {
   padding: 1.5rem;
   color: var(--primary-);      
-  border-bottom: 2px solid var(--primary); 
-  border-left: 2px solid var(--primary);    
+  border-bottom: 5px solid var(--primary); 
+  border-left: 5px solid var(--primary);    
 }
 .card-body:hover {
   padding: 1.5rem;
   color: var(--white);
   background-color: var(--primary);
-  border-bottom: 2px solid var(--primary); 
-  border-left: 2px solid var(--primary);
+
 }
 
 .card-footer {
@@ -360,9 +359,10 @@ input:focus, select:focus {
   transition: var(--transition);
   border-bottom: 1px solid var(--light);
 }
-h2,h1{
+h1{
   color:rgb(11, 11, 143)
 }
+
 .sidebar-link:hover, .sidebar-link.active {
   background-color: rgba(255, 255, 255, 0.1);
   color: var(--white);

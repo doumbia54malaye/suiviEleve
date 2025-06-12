@@ -526,20 +526,22 @@ function escapeHtml(unsafe) {
     
     .stat-card {
       background-color: var(--white);
+      border: 1px solid var(--primary);
       border-radius: var(--border-radius);
       box-shadow: var(--shadow);
       padding: 1.25rem;
       display: flex;
       align-items: center;
     }
-    
+
+
     .stat-icon {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 3rem;
       height: 3rem;
-      background-color: rgba(13, 110, 253, 0.1);
+      background-color: var(--prmary);
       color: var(--primary);
       border-radius: 50%;
       font-size: 1.25rem;
@@ -552,11 +554,11 @@ function escapeHtml(unsafe) {
       margin-bottom: 0.25rem;
     }
     
-    .stat-label {
-      font-size: 0.75rem;
-      color: var(--gray);
-    }
-    
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+  }
+
     .quick-actions {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
