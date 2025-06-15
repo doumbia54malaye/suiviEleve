@@ -14,8 +14,6 @@ from django.core.validators import validate_email
 from django.db import transaction
 from datetime import date, timedelta
 import datetime as dt
-
-
 from .models import *
 from .forms import *
 import json
@@ -388,7 +386,7 @@ def liste_eleves(request):
     }
 
     # 6. On rend le template avec le contexte.
-    # Assurez-vous que votre fichier template s'appelle bien 'liste_eleves.html'
+
     return render(request, 'liste_eleves.html', context)
     
     # Recherche textuelle
@@ -905,7 +903,7 @@ def teacher_dashboard_data(request):
 @login_required
 @require_http_methods(["POST"])
 def save_attendance(request):
-    """API pour enregistrer l'appel d'une séance"""
+    """API pour enregistrer l'appel d'une séance avec envoi SMS automatique"""
     if request.user.user_type != 'teacher':
         return JsonResponse({'error': 'Accès non autorisé'}, status=403)
     
@@ -933,7 +931,6 @@ def save_attendance(request):
             heure_debut = dt.datetime.strptime(data['heure_debut'], '%H:%M').time()
             heure_fin = dt.datetime.strptime(data['heure_fin'], '%H:%M').time()
         except ValueError as e:
-            # On renvoie une erreur plus précise si le format est mauvais
             return JsonResponse({'error': f'Format de date ou d\'heure invalide: {e}'}, status=400)
 
         # 4. Création ou récupération de la séance
@@ -975,34 +972,88 @@ def save_attendance(request):
                 )
         
         if presences_to_create:
-            Presence.objects.bulk_create(presences_to_create)
+            # Création des présences
+            created_presences = Presence.objects.bulk_create(presences_to_create)
+            
+            # NOUVEAU: Envoi automatique des SMS pour les absences
+            from .services.sms_service import sms_service
+            sms_sent_count = 0
+            sms_failed_count = 0
+            
+            # Traiter les SMS après la création des présences
+            for presence in presences_to_create:
+                if presence.statut == 'absent':
+                    try:
+                        # Récupérer l'élève complet pour avoir ses informations
+                        eleve = Eleve.objects.get(id=presence.eleve_id)
+                        
+                        # Vérifier si l'élève a un numéro de téléphone parent
+                        if eleve.telephone_parent:
+                            # Créer une instance de présence complète pour le service SMS
+                            presence.eleve = eleve
+                            presence.seance = seance
+                            
+                            # Envoyer le SMS
+                            if sms_service.send_absence_sms(presence):
+                                sms_sent_count += 1
+                                # Marquer que le SMS a été envoyé
+                                Presence.objects.filter(
+                                    seance=seance, 
+                                    eleve_id=presence.eleve_id
+                                ).update(sms_envoye=True)
+                            else:
+                                sms_failed_count += 1
+                        else:
+                            # Log que l'élève n'a pas de numéro
+                            logger.warning(f"Élève {eleve.nom_complet} n'a pas de numéro de téléphone parent")
+                            
+                    except Eleve.DoesNotExist:
+                        logger.error(f"Élève avec ID {presence.eleve_id} non trouvé")
+                        continue
+                    except Exception as e:
+                        logger.error(f"Erreur lors de l'envoi SMS pour élève {presence.eleve_id}: {str(e)}")
+                        sms_failed_count += 1
+                        continue
         
         # 6. Finalisation
         seance.appel_fait = True
         seance.save()
         
-        # 7. Préparation de la réponse de succès
+        # 7. Préparation de la réponse de succès avec info SMS
         total_eleves = len(presences_to_create)
         presents = sum(1 for p in presences_to_create if p.statut == 'present')
         absents = sum(1 for p in presences_to_create if p.statut == 'absent')
         retards = sum(1 for p in presences_to_create if p.statut == 'retard')
         
+        # Message de succès avec information SMS
+        success_message = f'Appel enregistré avec succès pour {total_eleves} élèves.'
+        if absents > 0:
+            if sms_sent_count > 0:
+                success_message += f' {sms_sent_count} SMS d\'absence envoyé(s).'
+            if sms_failed_count > 0:
+                success_message += f' {sms_failed_count} SMS ont échoué.'
+        
         return JsonResponse({
             'success': True,
-            'message': f'Appel enregistré avec succès pour {total_eleves} élèves.',
+            'message': success_message,
             'seance_id': seance.id,
             'stats': {
                 'total': total_eleves,
                 'presents': presents,
                 'absents': absents,
                 'retards': retards
+            },
+            'sms_info': {
+                'sent': sms_sent_count,
+                'failed': sms_failed_count,
+                'total_absents': absents
             }
         }, status=200)
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Données JSON invalides reçues'}, status=400)
     except Exception as e:
-        print(f"Erreur INATTENDUE dans save_attendance: {e}") # Pour le débogage
+        print(f"Erreur INATTENDUE dans save_attendance: {e}")
         return JsonResponse({'error': 'Une erreur interne est survenue sur le serveur.'}, status=500)
 @login_required
 @require_http_methods(["GET"])

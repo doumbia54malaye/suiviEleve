@@ -3,7 +3,7 @@ import requests
 import json
 from django.conf import settings
 from django.utils import timezone
-from .models import SMSLog
+from ..models import *
 import logging
 
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ class OrangeSMSService:
     def get_access_token(self):
         """Obtient le token d'accès Orange CI"""
         try:
-            auth_url = "https://api.orange.com/oauth/v2/token"
+            auth_url = "https://api.orange.com/oauth/v3/token"
             
             headers = {
                 'Authorization': f'Basic {self._get_basic_auth()}',
@@ -75,7 +75,7 @@ class OrangeSMSService:
                 phone_number = '+225' + phone_number
             
             # Préparer la requête SMS
-            sms_url = f"{self.config['BASE_URL']}/outbound/{self.config['SENDER_ADDRESS'].replace('tel:', '')}/requests"
+            sms_url = f"{self.config['BASE_URL']}/outbound/{self.config['SENDER_ADDRESS']}/requests"
             
             headers = {
                 'Authorization': f'Bearer {self.access_token}',
@@ -123,7 +123,7 @@ class OrangeSMSService:
         
 Votre enfant {eleve.nom_complet} a été marqué(e) ABSENT(E) le {seance.date.strftime('%d/%m/%Y')} de {seance.heure_debut} à {seance.heure_fin} en {seance.enseignement.matiere.nom} avec {seance.enseignement.enseignant.get_full_name()}.
 
-École - Système de gestion"""
+Ecole connectée - Collège Privé KOROKO"""
         
         return self.send_sms(
             eleve.telephone_parent,

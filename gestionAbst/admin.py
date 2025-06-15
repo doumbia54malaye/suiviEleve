@@ -59,4 +59,38 @@ class NoteAdmin(admin.ModelAdmin):
 class SMSLogAdmin(admin.ModelAdmin):
     list_display = ['destinataire', 'type_message', 'statut', 'created_at', 'sent_at']
     list_filter = ['statut', 'type_message', 'created_at']
+    search_fields = ['destinataire', 'message', 'reference_id']
     readonly_fields = ['created_at', 'sent_at']
+    
+    fieldsets = (
+        ('Informations SMS', {
+            'fields': ('destinataire', 'message', 'type_message', 'reference_id')
+        }),
+        ('Statut', {
+            'fields': ('statut', 'erreur_detail')
+        }),
+        ('Horodatage', {
+            'fields': ('created_at', 'sent_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Empêcher l'ajout manuel de logs SMS
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        # Permettre la suppression pour le nettoyage
+        return True
+    
+    actions = ['mark_as_sent', 'mark_as_error']
+    
+    def mark_as_sent(self, request, queryset):
+        queryset.update(statut='envoye')
+        self.message_user(request, f"{queryset.count()} SMS marqués comme envoyés.")
+    mark_as_sent.short_description = "Marquer comme envoyés"
+    
+    def mark_as_error(self, request, queryset):
+        queryset.update(statut='erreur')
+        self.message_user(request, f"{queryset.count()} SMS marqués en erreur.")
+    mark_as_error.short_description = "Marquer en erreur"

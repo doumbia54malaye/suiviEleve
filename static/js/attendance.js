@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentEnseignements = [];
   
   // Configuration du toast
-  const toast = {
+const toast = {
     element: document.getElementById('toast'),
     title: document.querySelector('.toast-title'),
     body: document.querySelector('.toast-body'),
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     show: function(title, message, type = 'success') {
       this.title.textContent = title;
-      this.body.textContent = message;
+      this.body.innerHTML = message; // Changé de textContent à innerHTML pour supporter les emojis
       
       this.element.className = 'toast show';
       
@@ -34,9 +34,12 @@ document.addEventListener('DOMContentLoaded', function() {
         this.title.previousElementSibling.style.color = 'var(--primary)';
       }
       
+      // Temps d'affichage plus long pour les messages avec SMS
+      const displayTime = message.includes('SMS') ? 8000 : 5000;
+      
       setTimeout(() => {
         this.hide();
-      }, 5000);
+      }, displayTime);
     },
     
     hide: function() {
@@ -512,6 +515,9 @@ async function initializePage() {
         };
       });
       
+      // Compter les absents pour information
+      const absentsCount = presences.filter(p => p.statut === 'absent').length;
+      
       // Extraire les heures du créneau sélectionné
       const timeSlot = timeSlotSelect.value;
       const [heureDebut, heureFin] = timeSlot.split('-');
@@ -535,7 +541,22 @@ async function initializePage() {
       
       if (response.success) {
         isSubmitted = true;
-        toast.show('Succès', response.message, 'success');
+        
+        // Message de succès personnalisé avec info SMS
+        let successMessage = response.message;
+        
+        // Afficher des détails sur les SMS si des absences ont été traitées
+        if (response.sms_info && response.sms_info.total_absents > 0) {
+          const smsInfo = response.sms_info;
+          if (smsInfo.sent > 0) {
+            successMessage += ` 📱 ${smsInfo.sent} SMS envoyé(s) aux parents.`;
+          }
+          if (smsInfo.failed > 0) {
+            successMessage += ` ⚠️ ${smsInfo.failed} SMS ont échoué.`;
+          }
+        }
+        
+        toast.show('Succès', successMessage, 'success');
         renderStudentsList(); // Re-render pour désactiver les contrôles
         updateSubmitButton();
         
@@ -557,6 +578,7 @@ async function initializePage() {
       submitBtn.innerHTML = '<i class="fa-solid fa-save"></i> Enregistrer l\'appel';
     }
   }
+
 
   // Réinitialiser le formulaire
   function resetForm() {

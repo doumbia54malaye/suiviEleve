@@ -131,13 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-# Configuration SMS Orange CI
-SMS_CONFIG = {
-    'BASE_URL': 'https://api.orange.com/smsmessaging/v1/outbound/',
-    'CLIENT_ID': 'votre-client-id',
-    'CLIENT_SECRET': 'votre-client-secret',
-    'NUMERO_ENVOI': 'tel:+225XXXXXXXX',
-}
+
 
 # Internationalisation
 LANGUAGE_CODE = 'fr-fr'
@@ -161,3 +155,37 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Ajouter cette configuration dans votre settings.py
+
+# Configuration SMS Orange CI
+ORANGE_SMS_CONFIG = {
+    'CLIENT_ID': 'LwIIrlSws6RdqDzJK1W11HWl7gcWSrTh', 
+    'CLIENT_SECRET': '7RfO63QmRhwyGgX5vKZm75f0Qg8zwH2Xl5qCvsI5q7Cv', 
+    'BASE_URL': 'https://api.orange.com/smsmessaging/v1',
+    'SENDER_ADDRESS': 'tel:+2250768275973',  # Votre numéro d'expéditeur Orange
+}
+
+# Configuration des logs
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': 'sms.log',
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'sms_service': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

@@ -320,27 +320,32 @@ class Seance(models.Model):
         verbose_name_plural = "Séances"
         ordering = ['-date', '-heure_debut']
 
+# Ajoutez ce champ à votre modèle Presence existant
 class Presence(models.Model):
     STATUT_CHOICES = [
         ('present', 'Présent'),
         ('absent', 'Absent'),
-        ('retard', 'En retard'),
+        ('retard', 'Retard'),
     ]
     
-    seance = models.ForeignKey(Seance, on_delete=models.CASCADE, related_name='presences')
-    eleve = models.ForeignKey(Eleve, on_delete=models.CASCADE)
+    seance = models.ForeignKey('Seance', on_delete=models.CASCADE, related_name='presences')
+    eleve = models.ForeignKey('Eleve', on_delete=models.CASCADE)
     statut = models.CharField(max_length=10, choices=STATUT_CHOICES, default='present')
     remarque = models.TextField(blank=True)
-    sms_envoye = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.eleve} - {self.seance} - {self.get_statut_display()}"
-
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    # NOUVEAU CHAMP POUR TRACKING SMS
+    sms_envoye = models.BooleanField(default=False, help_text="Indique si un SMS a été envoyé pour cette absence")
+    
     class Meta:
         unique_together = ['seance', 'eleve']
         verbose_name = "Présence"
         verbose_name_plural = "Présences"
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.eleve.nom_complet} - {self.seance} - {self.get_statut_display()}"
 
 class Note(models.Model):
     TYPE_CHOICES = [
@@ -357,9 +362,8 @@ class Note(models.Model):
     note_sur = models.DecimalField(max_digits=4, decimal_places=2, default=20)
     date_evaluation = models.DateField(default=timezone.now)
     description = models.CharField(max_length=200, blank=True)
-    sms_envoye = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    sms_envoye = models.BooleanField(default=False, help_text="Indique si un SMS a été envoyé pour cette note")
     def __str__(self):
         return f"{self.eleve} - {self.enseignement.matiere} - {self.valeur}/{self.note_sur}"
 

@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Presence, Note
-from .sms_service import sms_service
+from .services.sms_service import sms_service
 
 @receiver(post_save, sender=Presence)
 def handle_presence_change(sender, instance, created, **kwargs):

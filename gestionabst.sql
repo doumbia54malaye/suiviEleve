@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 12, 2025 at 08:35 PM
+-- Generation Time: Jun 15, 2025 at 03:32 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -162,7 +162,10 @@ INSERT INTO `django_admin_log` (`id`, `action_time`, `object_id`, `object_repr`,
 (19, '2025-06-11 11:51:26.473267', '1', 'IBRAHIMA FOFANA (Enseignant) - MATHEMATIQUE (MATHS) - 6EME1 - 2025-06-11 08:00:00', 1, '[{\"added\": {}}]', 12, 1),
 (20, '2025-06-11 11:52:00.662437', '2', 'SEGBE SOUMAHORO (Enseignant) - FRANCAIS (FRAN) - 6EME2 - 2025-06-11 09:00:00', 1, '[{\"added\": {}}]', 12, 1),
 (21, '2025-06-11 11:53:09.466473', '3', 'IBRAHIMA FOFANA (Enseignant) - MATHEMATIQUE (MATHS) - 6EME2 - 2025-06-11 09:00:00', 1, '[{\"added\": {}}]', 12, 1),
-(22, '2025-06-11 12:09:17.239518', '3', 'IBRAHIMA FOFANA (Enseignant) - MATHEMATIQUE (MATHS) - 6EME2 - 2025-06-11 12:00:00', 2, '[{\"changed\": {\"fields\": [\"Heure debut\", \"Heure fin\"]}}]', 12, 1);
+(22, '2025-06-11 12:09:17.239518', '3', 'IBRAHIMA FOFANA (Enseignant) - MATHEMATIQUE (MATHS) - 6EME2 - 2025-06-11 12:00:00', 2, '[{\"changed\": {\"fields\": [\"Heure debut\", \"Heure fin\"]}}]', 12, 1),
+(23, '2025-06-14 23:21:53.076032', '3', 'KOUAKOU Jean Marc (19627056H)', 2, '[{\"changed\": {\"fields\": [\"T\\u00e9l\\u00e9phone parent\"]}}]', 8, 1),
+(24, '2025-06-14 23:22:32.334473', '12', 'DOUMBIA Malaye - IBRAHIMA FOFANA (Enseignant) - MATHEMATIQUE (MATHS) - 6EME1 - 2025-06-11 08:00:00 - Absent', 1, '[{\"added\": {}}]', 14, 1),
+(25, '2025-06-14 23:25:49.031594', '4', 'OUATTARA Ami (20161516Z)', 2, '[{\"changed\": {\"fields\": [\"T\\u00e9l\\u00e9phone parent\"]}}]', 8, 1);
 
 -- --------------------------------------------------------
 
@@ -234,7 +237,8 @@ INSERT INTO `django_migrations` (`id`, `app`, `name`, `applied`) VALUES
 (18, 'admin', '0003_logentry_add_action_flag_choices', '2025-06-03 21:15:54.058165'),
 (19, 'sessions', '0001_initial', '2025-06-03 21:15:54.109598'),
 (20, 'gestionAbst', '0002_customuser_created_at_customuser_updated_at_and_more', '2025-06-07 18:26:37.248533'),
-(21, 'gestionAbst', '0003_alter_classe_options_remove_classe_description_and_more', '2025-06-08 11:40:25.849532');
+(21, 'gestionAbst', '0003_alter_classe_options_remove_classe_description_and_more', '2025-06-08 11:40:25.849532'),
+(22, 'gestionAbst', '0004_alter_presence_options_and_more', '2025-06-14 23:06:45.899365');
 
 -- --------------------------------------------------------
 
@@ -272,6 +276,7 @@ INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALU
 ('91oxrncnf2v22zsth70e2d3pknqairmb', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uOcXR:0OQZPS13XFtuW1dPSSBX1zEglGYMW8dLzo7qxjNaAHM', '2025-06-09 14:27:45.415593'),
 ('92yvi8qb2kqsod0jxlilgkwrtl52lkuy', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uOQyH:rT_wVMldTiq-3lN21KraS0sm_I8zf8XeBxkmZyzSRmY', '2025-06-09 02:06:41.539954'),
 ('93fwo3qjjfh1usmw0rt17wbof7uwf08f', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uObU5:nM86pYTYqOaKA3CpvbmbIbr4TFY8MrJ-41PYRXUnpmQ', '2025-06-09 13:20:13.572919'),
+('9cadwfh7c0ih2atnybol1jgotr2jz339', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uQMV7:RAdd-Zv4DHJl5JeE2mAjSFfZ9xXjbjO46DBREX-y0Ug', '2025-06-14 09:44:33.280157'),
 ('9ld7icl3cso3mbdxah7f69mbkjwf76r8', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uNve1:pmHbZMIZcz5s5U0K2cuD7X1wOhr-zvTy1IGNsZ1tMe8', '2025-06-07 16:39:41.035338'),
 ('9tqob5u6habffrymizbcppceggivusa3', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uOvMX:_f3HZdH_tS98FyvrEKTiADkBOMH4ORCLkLuyFpJCXyc', '2025-06-10 10:33:45.620041'),
 ('aw7cb1cf7dyhdwoh48n9afm9svqhj9qe', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uNg7P:vhh_LzpBJj7xOFbLTw5OYESHOekVLgarcNQ354Ab-9g', '2025-06-07 00:04:59.115863'),
@@ -285,6 +290,7 @@ INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALU
 ('dz6j1g30o12kmbaq6whjlshtkqkw2r92', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uNyHP:0CcrgBXp_fmTFb0_asVx46MzOJHpBxpPNtCzSGXFVvk', '2025-06-07 19:28:31.060636'),
 ('e1h0uqxtew73fd1syo7gdsqd0do9tprk', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uOkaW:46khjkCka-U6AHdmylBdierRh3VqtIj3SSb0KJITAnQ', '2025-06-09 23:03:28.836823'),
 ('e1zuipt2p3xq38edkzbknhn8psbpspqt', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uPLVh:sUX_VAYXaBEtiNCbmbWBp6K4POVN02BvvcC7iYIq2bI', '2025-06-11 14:28:57.321192'),
+('efd33hqsn2g8x2zvvpsvvqgl8hgyqzsq', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uPmwC:Tg0JO2btQYZVOT-M2PXPSdxJ0sbsOBUCFc3ajYoi_zw', '2025-06-12 19:46:08.991320'),
 ('ehqb9dqjnasmi8w8btzup6pef9x3z1kx', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uNgH7:3OVVUSIwEcBAaDQL6bOGRoRDFRX3A64NZwxjq80K5mo', '2025-06-07 00:15:01.219471'),
 ('erh3y35qr0tryu3l4kcrwvm1i4pmstgw', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uOgY2:EarC115UlTO0GYi7ZaE2Is4w3u5f23QtnLqmZGGlu9I', '2025-06-09 18:44:38.190586'),
 ('f7twmbxq216gnx1ht94y0gk8kkxcubut', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uOcwL:4yi2PvbholjZvVaY9afV9r4OrcmFbk9NIfpEN_FlnWQ', '2025-06-09 14:53:29.167876'),
@@ -305,6 +311,7 @@ INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALU
 ('kfl8wosj8bjkc0lllcehvqrdkcrv8jh6', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uNpR0:UzIDFSmCdlYNT6reqtObm8X5qYU02BBwjYCIRdIgEwg', '2025-06-07 10:01:50.457691'),
 ('l4x4kjeofd5o9rpf37flnpx9h1l0qyxf', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uObMF:xjyDNVX85oiEGq4Lh5t62CEJvU8Dp8lt_KAV_DMEAzw', '2025-06-09 13:12:07.600355'),
 ('li4scb4qlhx11aza82fh4cb44a9nexwg', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uO2ef:m-3glWKvMhdg51vQStGJuEKPjN-iF5NoLyhCeL1DMGM', '2025-06-08 00:08:49.849985'),
+('m55tco4zswvcnzru1wg1uua5hub60nze', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uQcCi:rpZ0u_iQQrQ9ZiQLmi2l6uB6EpLBsoqWYh5IrA-QKxM', '2025-06-15 02:30:36.771807'),
 ('n7qs4sv2t69hdr6tagdwerp8rbs7wffp', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uNpjZ:9QgcNoTbKtPBWzi1b2Ig_v0yAswT0pytEwzRiosrX5M', '2025-06-07 10:21:01.051094'),
 ('nf1hooj1su5xgrit3ishtmx16lxlntrx', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uPLPN:GOt0JuqyPpNzinZH5qO6KTXHf4Vzu0vnQhZQsg6b1_k', '2025-06-11 14:22:25.667007'),
 ('nrkkg2o9bml0jx6ozjamy4o7ekrllljc', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uOcyq:OyCQYOkJvlMM7XlWtLCrTylgEhLzGAmfdt-SGsU1ZBI', '2025-06-09 14:56:04.684940'),
@@ -338,6 +345,7 @@ INSERT INTO `django_session` (`session_key`, `session_data`, `expire_date`) VALU
 ('y67o3slly7u2hdsks0kd99e0y7ajj0t9', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uOCiz:DKr49S1QzD0F_hDYth4Vb6BGp8Fowf1-s6QPAGrLV9s', '2025-06-08 10:53:57.152034'),
 ('ydtii8yz9bd0of5r0qmqwaojh16xuyjo', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uPNpq:h409cg_szqNpqIHtyj3k3hZfP_eO-H4puHKLCqniRYY', '2025-06-11 16:57:54.696173'),
 ('yfbn058w9r88o3ph4cf781by2id4b9bw', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uPMKI:kb2I5hOEvob68wDeVOxPonh8cwfp1K-rOS77nEPLFc4', '2025-06-11 15:21:14.684780'),
+('yq4iabqm1kgm1965necb4ro5jcnc1zbq', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uQVzR:xRh2LjumUG_53qWMrD5S7tmveaNfiwP4Rkz1n1GM7nk', '2025-06-14 19:52:29.779701'),
 ('yxri9pvcocho9k7wt5wdeaybnuf6f46b', '.eJxVjDsOwyAQBe9CHSE-i4CU6XMGtMASnEQgGbuycvfYkouknZn3NhZwXWpYB81hyuzKJLv8sojpRe0Q-Ynt0XnqbZmnyI-En3bwe8_0vp3t30HFUfe1IRLWFouoorHemJIkkRfOFyuSdgVcigBaKuW0AJMdYrY7M0WhB2CfL-L3N7U:1uOPGO:UgxLtM7nVeyPlP79gA3TMzClNLJQgKTkGwnv9CJw6q4', '2025-06-09 00:17:16.346987'),
 ('z32vdhr9ks7ps5ddloag4ufuo8euvwiv', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uOcpJ:_vD58kImK6jU0RqGmFU-GAV983vn8DmJ_giX4E_p5E8', '2025-06-09 14:46:13.310798'),
 ('zi224u9ql8jbuwjwrkh29nfce4dsv4tc', '.eJxVjEsOAiEQBe_C2hAiTAMu3XsG0nTTMmogmc9q4t11klno9lXV21TCdalpncuURlYXZdXpd8tIz9J2wA9s966pt2Uas94VfdBZ3zqX1_Vw_w4qzvVbI3FAbxwPTCIWkFw8i2QhKBGicAjego3eZTMAkB9iAcmAwROhcer9ARQ2OL0:1uPKcf:-QruLf4HjhTONkq8hQ-rwwa5dRS3D14RMXPwF4RCfsc', '2025-06-11 13:32:05.533252'),
@@ -401,9 +409,9 @@ CREATE TABLE `gestionabst_customuser` (
 --
 
 INSERT INTO `gestionabst_customuser` (`id`, `password`, `last_login`, `is_superuser`, `username`, `first_name`, `last_name`, `is_staff`, `is_active`, `date_joined`, `user_type`, `phone_number`, `email`, `created_at`, `updated_at`) VALUES
-(1, 'pbkdf2_sha256$600000$jFvQVXtqWt7vmEtypJVH5Z$tAMJAaE6OiIE4gpnLDQxHg4B1q6qkhNKL5vuFkRBCWg=', '2025-06-12 18:01:05.017410', 1, 'Mr.Robot', 'Malaye', 'Doumbia', 1, 1, '2025-06-03 21:17:47.000000', 'admin', '+2250768275973', 'ecole@gmail.com', '2025-06-07 18:26:37.173676', '2025-06-07 18:26:37.192174'),
+(1, 'pbkdf2_sha256$600000$jFvQVXtqWt7vmEtypJVH5Z$tAMJAaE6OiIE4gpnLDQxHg4B1q6qkhNKL5vuFkRBCWg=', '2025-06-15 01:28:13.081981', 1, 'Mr.Robot', 'Malaye', 'Doumbia', 1, 1, '2025-06-03 21:17:47.000000', 'admin', '+2250768275973', 'ecole@gmail.com', '2025-06-07 18:26:37.173676', '2025-06-07 18:26:37.192174'),
 (2, 'pbkdf2_sha256$600000$NDwWmQKWrMEwA9vhrtMwt5$SIlJ3+NcwEoin+5BASkwnyHa7VGHACBbRGRmOKlX8IA=', NULL, 0, 'SOUMAHORO', 'SEGBE', 'SOUMAHORO', 0, 1, '2025-06-03 22:40:40.000000', 'teacher', '+2250556287988', 'segbe@gmail.com', '2025-06-07 18:26:37.173676', '2025-06-07 18:26:37.192174'),
-(3, 'pbkdf2_sha256$600000$7t9XbkrVRONFtJbAgil2Dp$3Wha12hhaKMR3IF34aNRf83JL45xZSLR3jiw7XzrKdM=', '2025-06-12 17:37:19.384333', 0, 'BRAHIMA', 'IBRAHIMA', 'FOFANA', 0, 1, '2025-06-07 11:15:20.000000', 'teacher', '0503435800', 'fof@gmail.com', '2025-06-07 18:26:37.173676', '2025-06-07 18:26:37.192174'),
+(3, 'pbkdf2_sha256$600000$7t9XbkrVRONFtJbAgil2Dp$3Wha12hhaKMR3IF34aNRf83JL45xZSLR3jiw7XzrKdM=', '2025-06-15 00:49:32.701035', 0, 'BRAHIMA', 'IBRAHIMA', 'FOFANA', 0, 1, '2025-06-07 11:15:20.000000', 'teacher', '0503435800', 'fof@gmail.com', '2025-06-07 18:26:37.173676', '2025-06-07 18:26:37.192174'),
 (4, 'pbkdf2_sha256$600000$Eh8rBh97KaRm1Eef2NXfUy$Bebi3pSbBD9rdzW7S8RzEEBBlNMllleco7TX9FNgxYU=', NULL, 0, 'PAUL', 'JEAN', 'PAUL', 1, 1, '2025-06-08 22:56:32.409166', 'admin', '+2250554647935', 'paul@gmail.com', '2025-06-08 22:56:32.947167', '2025-06-08 22:56:32.947176'),
 (5, 'pbkdf2_sha256$600000$1X5G8bX4KLZbuey21fnGEI$gF5y9wkrAomUZzUDdjZCA8wlYbWVcBiOAMTeeJnANbQ=', NULL, 0, 'SIAKA', 'FOFANA', 'SIAKA', 0, 1, '2025-06-08 23:06:07.291452', 'teacher', '+2250574267601', 'siaka@gmail.com', '2025-06-08 23:06:07.616942', '2025-06-08 23:06:07.616955');
 
@@ -458,8 +466,8 @@ CREATE TABLE `gestionabst_eleve` (
 
 INSERT INTO `gestionabst_eleve` (`id`, `nom`, `prenoms`, `date_naissance`, `matricule`, `nom_parent`, `telephone_parent`, `email_parent`, `actif`, `created_at`, `classe_id`, `updated_at`) VALUES
 (2, 'DOUMBIA', 'Malaye', '2007-12-02', '10100891Z', 'DOUMBIA ZOUMANA', '+2250554647935', 'doumbia@gmail.com', 1, '2025-06-08 12:32:09.993748', 1, '2025-06-08 12:32:09.993789'),
-(3, 'KOUAKOU', 'Jean Marc', '2007-05-07', '19627056H', 'KOUAKOU KOUASSI JOSUE', '+2250709553048', 'josue@gmail.com', 1, '2025-06-08 15:56:20.423415', 2, '2025-06-08 15:56:20.423440'),
-(4, 'OUATTARA', 'Ami', '2001-01-01', '20161516Z', 'OUATTARA DIATA', '+2250585493736', 'diata@gmail.com', 1, '2025-06-10 23:12:43.030264', 2, '2025-06-10 23:12:43.030284');
+(3, 'KOUAKOU', 'Jean Marc', '2007-05-07', '19627056H', 'KOUAKOU KOUASSI JOSUE', '+2250758483084', 'josue@gmail.com', 1, '2025-06-08 15:56:20.423415', 2, '2025-06-14 23:21:53.074221'),
+(4, 'OUATTARA', 'Ami', '2001-01-01', '20161516Z', 'OUATTARA DIATA', '+2250554647935', 'diata@gmail.com', 1, '2025-06-10 23:12:43.030264', 2, '2025-06-14 23:25:49.029876');
 
 -- --------------------------------------------------------
 
@@ -545,25 +553,44 @@ CREATE TABLE `gestionabst_presence` (
   `sms_envoye` tinyint(1) NOT NULL,
   `created_at` datetime(6) NOT NULL,
   `eleve_id` bigint(20) NOT NULL,
-  `seance_id` bigint(20) NOT NULL
+  `seance_id` bigint(20) NOT NULL,
+  `updated_at` datetime(6) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `gestionabst_presence`
 --
 
-INSERT INTO `gestionabst_presence` (`id`, `statut`, `remarque`, `sms_envoye`, `created_at`, `eleve_id`, `seance_id`) VALUES
-(1, 'absent', '', 0, '2025-06-11 12:51:58.165157', 3, 4),
-(2, 'present', '', 0, '2025-06-11 12:51:58.165236', 4, 4),
-(3, 'retard', '', 0, '2025-06-11 13:02:56.305224', 2, 5),
-(4, 'absent', '', 0, '2025-06-11 13:33:07.422515', 3, 6),
-(5, 'absent', '', 0, '2025-06-11 13:33:07.422654', 4, 6),
-(6, 'present', '', 0, '2025-06-11 14:06:18.460721', 3, 7),
-(7, 'present', '', 0, '2025-06-11 14:06:18.460791', 4, 7),
-(8, 'absent', '', 0, '2025-06-11 15:37:12.982849', 3, 8),
-(9, 'retard', '', 0, '2025-06-11 15:37:12.982878', 4, 8),
-(10, 'absent', '', 0, '2025-06-12 17:37:43.473680', 3, 9),
-(11, 'present', '', 0, '2025-06-12 17:37:43.473748', 4, 9);
+INSERT INTO `gestionabst_presence` (`id`, `statut`, `remarque`, `sms_envoye`, `created_at`, `eleve_id`, `seance_id`, `updated_at`) VALUES
+(1, 'absent', '', 0, '2025-06-11 12:51:58.165157', 3, 4, '2025-06-14 23:06:45.815569'),
+(2, 'present', '', 0, '2025-06-11 12:51:58.165236', 4, 4, '2025-06-14 23:06:45.815569'),
+(3, 'retard', '', 0, '2025-06-11 13:02:56.305224', 2, 5, '2025-06-14 23:06:45.815569'),
+(4, 'absent', '', 0, '2025-06-11 13:33:07.422515', 3, 6, '2025-06-14 23:06:45.815569'),
+(5, 'absent', '', 0, '2025-06-11 13:33:07.422654', 4, 6, '2025-06-14 23:06:45.815569'),
+(6, 'present', '', 0, '2025-06-11 14:06:18.460721', 3, 7, '2025-06-14 23:06:45.815569'),
+(7, 'present', '', 0, '2025-06-11 14:06:18.460791', 4, 7, '2025-06-14 23:06:45.815569'),
+(8, 'absent', '', 0, '2025-06-11 15:37:12.982849', 3, 8, '2025-06-14 23:06:45.815569'),
+(9, 'retard', '', 0, '2025-06-11 15:37:12.982878', 4, 8, '2025-06-14 23:06:45.815569'),
+(10, 'absent', '', 0, '2025-06-12 17:37:43.473680', 3, 9, '2025-06-14 23:06:45.815569'),
+(11, 'present', '', 0, '2025-06-12 17:37:43.473748', 4, 9, '2025-06-14 23:06:45.815569'),
+(12, 'absent', '', 1, '2025-06-14 23:22:32.330069', 2, 1, '2025-06-14 23:22:32.330098'),
+(13, 'absent', '', 0, '2025-06-14 23:26:39.431775', 3, 10, '2025-06-14 23:26:39.431795'),
+(14, 'absent', '', 0, '2025-06-14 23:26:39.431821', 4, 10, '2025-06-14 23:26:39.431827'),
+(15, 'absent', '', 0, '2025-06-14 23:26:52.127118', 3, 11, '2025-06-14 23:26:52.127171'),
+(16, 'absent', '', 0, '2025-06-14 23:26:52.127195', 4, 11, '2025-06-14 23:26:52.127204'),
+(17, 'absent', '', 0, '2025-06-14 23:40:23.606083', 3, 12, '2025-06-14 23:40:23.606235'),
+(18, 'absent', '', 0, '2025-06-14 23:40:23.606257', 4, 12, '2025-06-14 23:40:23.606264'),
+(19, 'absent', '', 0, '2025-06-15 00:00:49.059030', 3, 13, '2025-06-15 00:00:49.059051'),
+(20, 'absent', '', 0, '2025-06-15 00:00:49.059069', 4, 13, '2025-06-15 00:00:49.059076'),
+(21, 'absent', '', 0, '2025-06-15 00:06:51.112169', 3, 14, '2025-06-15 00:06:51.112185'),
+(22, 'absent', '', 0, '2025-06-15 00:06:51.112198', 4, 14, '2025-06-15 00:06:51.112203'),
+(23, 'absent', '', 0, '2025-06-15 00:35:02.619418', 3, 15, '2025-06-15 00:35:02.619473'),
+(24, 'absent', '', 0, '2025-06-15 00:35:02.619534', 4, 15, '2025-06-15 00:35:02.619557'),
+(25, 'absent', '', 0, '2025-06-15 00:49:56.185235', 3, 16, '2025-06-15 00:49:56.185257'),
+(26, 'absent', '', 0, '2025-06-15 00:49:56.185272', 4, 16, '2025-06-15 00:49:56.185278'),
+(27, 'absent', '', 1, '2025-06-15 01:13:05.806436', 3, 17, '2025-06-15 01:13:05.806455'),
+(28, 'absent', '', 1, '2025-06-15 01:13:05.806468', 4, 17, '2025-06-15 01:13:05.806473'),
+(29, 'absent', '', 1, '2025-06-15 01:27:44.417760', 2, 18, '2025-06-15 01:27:44.417793');
 
 -- --------------------------------------------------------
 
@@ -595,7 +622,16 @@ INSERT INTO `gestionabst_seance` (`id`, `date`, `heure_debut`, `heure_fin`, `des
 (6, '2025-06-11', '13:00:00.000000', '14:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-11 13:33:07.411392', 6),
 (7, '2025-06-11', '10:00:00.000000', '11:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-11 14:06:18.450251', 6),
 (8, '2025-06-11', '15:00:00.000000', '16:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-11 15:37:12.978179', 6),
-(9, '2025-06-12', '10:00:00.000000', '11:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-12 17:37:43.464662', 6);
+(9, '2025-06-12', '10:00:00.000000', '11:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-12 17:37:43.464662', 6),
+(10, '2025-06-14', '14:00:00.000000', '15:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 0, '2025-06-14 23:26:39.426981', 6),
+(11, '2025-06-14', '16:00:00.000000', '17:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 0, '2025-06-14 23:26:52.120590', 6),
+(12, '2025-06-14', '13:00:00.000000', '14:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-14 23:40:23.599379', 6),
+(13, '2025-06-15', '11:00:00.000000', '12:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-15 00:00:49.051333', 6),
+(14, '2025-06-15', '10:00:00.000000', '11:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-15 00:06:51.105931', 6),
+(15, '2025-06-15', '16:00:00.000000', '17:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-15 00:35:02.609374', 6),
+(16, '2025-06-15', '08:00:00.000000', '09:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-15 00:49:56.176115', 6),
+(17, '2025-06-15', '09:00:00.000000', '10:00:00.000000', 'Cours de MATHEMATIQUE - 6EME2', 1, '2025-06-15 01:13:05.799395', 6),
+(18, '2025-06-15', '10:00:00.000000', '11:00:00.000000', 'Cours de MATHEMATIQUE - 6EME1', 1, '2025-06-15 01:27:44.411172', 5);
 
 -- --------------------------------------------------------
 
@@ -614,6 +650,25 @@ CREATE TABLE `gestionabst_smslog` (
   `created_at` datetime(6) NOT NULL,
   `sent_at` datetime(6) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `gestionabst_smslog`
+--
+
+INSERT INTO `gestionabst_smslog` (`id`, `destinataire`, `message`, `statut`, `type_message`, `reference_id`, `erreur_detail`, `created_at`, `sent_at`) VALUES
+(1, '+2250758483084', 'Bonjour KOUAKOU KOUASSI JOSUE,\n        \nVotre enfant KOUAKOU Jean Marc a été marqué(e) ABSENT(E) le 14/06/2025 de 13:00:00 à 14:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-14 23:40:24.201819', NULL),
+(2, '+2250554647935', 'Bonjour OUATTARA DIATA,\n        \nVotre enfant OUATTARA Ami a été marqué(e) ABSENT(E) le 14/06/2025 de 13:00:00 à 14:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-14 23:40:24.750080', NULL),
+(3, '+2250758483084', 'Bonjour KOUAKOU KOUASSI JOSUE,\n        \nVotre enfant KOUAKOU Jean Marc a été marqué(e) ABSENT(E) le 15/06/2025 de 11:00:00 à 12:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:00:49.562439', NULL),
+(4, '+2250554647935', 'Bonjour OUATTARA DIATA,\n        \nVotre enfant OUATTARA Ami a été marqué(e) ABSENT(E) le 15/06/2025 de 11:00:00 à 12:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:00:50.075801', NULL),
+(5, '+2250758483084', 'Bonjour KOUAKOU KOUASSI JOSUE,\n        \nVotre enfant KOUAKOU Jean Marc a été marqué(e) ABSENT(E) le 15/06/2025 de 10:00:00 à 11:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:06:51.654248', NULL),
+(6, '+2250554647935', 'Bonjour OUATTARA DIATA,\n        \nVotre enfant OUATTARA Ami a été marqué(e) ABSENT(E) le 15/06/2025 de 10:00:00 à 11:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:06:52.153696', NULL),
+(7, '+2250758483084', 'Bonjour KOUAKOU KOUASSI JOSUE,\n        \nVotre enfant KOUAKOU Jean Marc a été marqué(e) ABSENT(E) le 15/06/2025 de 16:00:00 à 17:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:35:03.174271', NULL),
+(8, '+2250554647935', 'Bonjour OUATTARA DIATA,\n        \nVotre enfant OUATTARA Ami a été marqué(e) ABSENT(E) le 15/06/2025 de 16:00:00 à 17:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:35:03.696185', NULL),
+(9, '+2250758483084', 'Bonjour KOUAKOU KOUASSI JOSUE,\n        \nVotre enfant KOUAKOU Jean Marc a été marqué(e) ABSENT(E) le 15/06/2025 de 08:00:00 à 09:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:49:56.663660', NULL),
+(10, '+2250554647935', 'Bonjour OUATTARA DIATA,\n        \nVotre enfant OUATTARA Ami a été marqué(e) ABSENT(E) le 15/06/2025 de 08:00:00 à 09:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'erreur', 'absence', 'presence_None', 'Impossible d\'obtenir le token d\'accès', '2025-06-15 00:49:57.474205', NULL),
+(11, '+2250758483084', 'Bonjour KOUAKOU KOUASSI JOSUE,\n        \nVotre enfant KOUAKOU Jean Marc a été marqué(e) ABSENT(E) le 15/06/2025 de 09:00:00 à 10:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'envoye', 'absence', 'presence_None', '', '2025-06-15 01:13:06.111722', '2025-06-15 01:13:07.502649'),
+(12, '+2250554647935', 'Bonjour OUATTARA DIATA,\n        \nVotre enfant OUATTARA Ami a été marqué(e) ABSENT(E) le 15/06/2025 de 09:00:00 à 10:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nÉcole - Système de gestion', 'envoye', 'absence', 'presence_None', '', '2025-06-15 01:13:07.510867', '2025-06-15 01:13:08.429551'),
+(13, '+2250554647935', 'Bonjour DOUMBIA ZOUMANA,\n        \nVotre enfant DOUMBIA Malaye a été marqué(e) ABSENT(E) le 15/06/2025 de 10:00:00 à 11:00:00 en MATHEMATIQUE avec IBRAHIMA FOFANA.\n\nEcole connectée - Collège Privé KOROKO', 'envoye', 'absence', 'presence_None', '', '2025-06-15 01:27:45.021757', '2025-06-15 01:27:46.426620');
 
 --
 -- Indexes for dumped tables
@@ -783,7 +838,7 @@ ALTER TABLE `auth_permission`
 -- AUTO_INCREMENT for table `django_admin_log`
 --
 ALTER TABLE `django_admin_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
 
 --
 -- AUTO_INCREMENT for table `django_content_type`
@@ -795,7 +850,7 @@ ALTER TABLE `django_content_type`
 -- AUTO_INCREMENT for table `django_migrations`
 --
 ALTER TABLE `django_migrations`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `gestionabst_classe`
@@ -849,19 +904,19 @@ ALTER TABLE `gestionabst_note`
 -- AUTO_INCREMENT for table `gestionabst_presence`
 --
 ALTER TABLE `gestionabst_presence`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `gestionabst_seance`
 --
 ALTER TABLE `gestionabst_seance`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `gestionabst_smslog`
 --
 ALTER TABLE `gestionabst_smslog`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
