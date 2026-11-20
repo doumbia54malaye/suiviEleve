@@ -1,0 +1,336 @@
+/* =========================================
+   Page « Faire l'appel » – Collège Privé Koroko
+   À charger APRÈS dashboard.css
+   Remplace les styles qui étaient dans <style> du template
+   ========================================= */
+
+/* ---------- En-tête de page ---------- */
+.page-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.4s ease;
+}
+.page-hero-icon {
+  width: 56px; height: 56px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  display: grid; place-items: center;
+  font-size: 1.4rem;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 10px 22px rgba(15, 95, 216, 0.25);
+}
+.page-hero h1 {
+  font-family: inherit;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.15rem;
+}
+.page-hero p { color: var(--muted); font-size: 0.9rem; }
+
+/* ---------- Cartes étapes ---------- */
+.attendance-page .step-card:hover { transform: none; }
+.attendance-page .step-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+.step-num {
+  width: 34px; height: 34px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--primary-dark);
+  background: rgba(52, 152, 219, 0.12);
+}
+
+/* ---------- Champs avec icône ---------- */
+.attendance-page .form-row { gap: 1.1rem; }
+.attendance-page label { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+
+.field-icon { position: relative; }
+.field-icon > i:first-child {
+  position: absolute;
+  left: 0.95rem; top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+.field-icon:focus-within > i:first-child { color: var(--primary); }
+.attendance-page .field-icon select {
+  height: 48px;
+  padding: 0 2.5rem 0 2.6rem;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+.field-icon .select-arrow {
+  position: absolute;
+  right: 0.95rem; top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* ---------- Compteurs ---------- */
+.attendance-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+.attendance-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--line);
+  background: #fafcff;
+}
+.attendance-stats .stat > i {
+  width: 38px; height: 38px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  display: grid; place-items: center;
+}
+.attendance-stats strong { display: block; font-size: 1.25rem; line-height: 1.1; color: var(--ink); }
+.attendance-stats span { font-size: 0.75rem; color: var(--muted); }
+
+.stat.total   > i { background: rgba(52, 152, 219, 0.12); color: var(--primary-dark); }
+.stat.present > i { background: rgba(25, 135, 84, 0.12);  color: var(--success); }
+.stat.absent  > i { background: rgba(220, 53, 69, 0.1);   color: var(--danger); }
+.stat.late    > i { background: rgba(253, 126, 20, 0.12); color: var(--warning); }
+
+/* ---------- Liste des élèves (HTML injecté par attendance.js) ---------- */
+.attendance-page .students-list {
+  margin: 0;
+  min-height: 200px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.attendance-page .placeholder-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 240px;
+  text-align: center;
+  color: var(--muted);
+  background:
+    repeating-linear-gradient(45deg, #fafcff 0 12px, #f5f8fd 12px 24px);
+}
+.placeholder-icon {
+  width: 64px; height: 64px;
+  margin: 0 auto 0.9rem;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 1.5rem;
+  color: var(--primary);
+  background: var(--white);
+  box-shadow: 0 8px 20px rgba(11, 42, 91, 0.08);
+}
+.attendance-page .placeholder-message strong { color: var(--ink); font-size: 0.95rem; }
+.attendance-page .placeholder-message p { font-size: 0.85rem; }
+
+.attendance-page .students-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  background: #f7f9fc;
+  border-bottom: 1px solid var(--line);
+}
+.attendance-page .students-header h3 { margin: 0; font-size: 0.95rem; font-weight: 600; color: var(--ink); }
+
+.attendance-page .bulk-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.attendance-page .bulk-actions .btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+
+.attendance-page .students-table { max-height: 460px; overflow-y: auto; }
+.attendance-page .students-table table { width: 100%; border-collapse: collapse; }
+.attendance-page .students-table th,
+.attendance-page .students-table td {
+  padding: 0.8rem 1.1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.attendance-page .students-table th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--white);
+  box-shadow: inset 0 -1px 0 var(--line);
+}
+
+/* Barre de scroll discrète */
+.students-table::-webkit-scrollbar { width: 8px; height: 8px; }
+.students-table::-webkit-scrollbar-thumb { background: #d5dde8; border-radius: 8px; }
+
+/* Lignes : bande colorée à gauche selon le statut */
+.attendance-page .student-row {
+  transition: background-color 0.2s ease;
+  box-shadow: inset 4px 0 0 transparent;
+}
+.attendance-page .student-row:hover { background: #f7faff; }
+.attendance-page .student-row.present { background: rgba(25, 135, 84, 0.05);  box-shadow: inset 4px 0 0 var(--success); }
+.attendance-page .student-row.absent  { background: rgba(220, 53, 69, 0.06);  box-shadow: inset 4px 0 0 var(--danger); }
+.attendance-page .student-row.retard,
+.attendance-page .student-row.late    { background: rgba(253, 126, 20, 0.06); box-shadow: inset 4px 0 0 var(--warning); }
+
+.attendance-page .status-controls { white-space: nowrap; }
+.attendance-page .status-buttons {
+  display: inline-flex;
+  gap: 0.3rem;
+  padding: 0.25rem;
+  border-radius: 0.8rem;
+  background: #f1f5fb;
+}
+
+.attendance-page .status-btn {
+  width: 36px; height: 36px;
+  border: none;
+  border-radius: 0.6rem;
+  background: transparent;
+  display: grid; place-items: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.attendance-page .status-btn:hover { background: var(--white); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(11, 42, 91, 0.08); }
+
+.attendance-page .status-btn.present { color: var(--success); }
+.attendance-page .status-btn.absent  { color: var(--danger); }
+.attendance-page .status-btn.late    { color: var(--warning); }
+
+.attendance-page .status-btn.active { color: var(--white); transform: scale(1.05); }
+.attendance-page .status-btn.present.active { background: var(--success); box-shadow: 0 4px 10px rgba(25, 135, 84, 0.35); }
+.attendance-page .status-btn.absent.active  { background: var(--danger);  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.35); }
+.attendance-page .status-btn.late.active    { background: var(--warning); box-shadow: 0 4px 10px rgba(253, 126, 20, 0.35); }
+
+.attendance-page .status-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.attendance-page .status-label.present { background: rgba(25, 135, 84, 0.12);  color: var(--success); }
+.attendance-page .status-label.absent  { background: rgba(220, 53, 69, 0.1);   color: var(--danger); }
+.attendance-page .status-label.retard,
+.attendance-page .status-label.late    { background: rgba(253, 126, 20, 0.12); color: #c25e06; }
+
+.attendance-page .remarks input {
+  width: 100%;
+  min-width: 160px;
+  height: 38px;
+  font-size: 0.82rem;
+}
+.attendance-page .remark-text { font-style: italic; color: var(--muted); font-size: 0.85rem; }
+
+/* ---------- Barre d'actions collante ---------- */
+.attendance-page .action-bar {
+  position: sticky;
+  bottom: 1rem;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 12px 30px rgba(11, 42, 91, 0.12);
+}
+.action-hint { font-size: 0.82rem; color: var(--muted); }
+.action-hint i { color: var(--primary); margin-right: 0.3rem; }
+.action-buttons { display: flex; gap: 0.75rem; }
+.action-buttons .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.2rem; }
+
+.attendance-page .btn-outline-secondary {
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  background: var(--white);
+}
+.attendance-page .btn-outline-secondary:hover { border-color: #cbd5e1; background: #f7f9fc; }
+
+.attendance-page .btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Notifications vides */
+.notif-empty { padding: 1.75rem 1rem; text-align: center; color: var(--muted); font-size: 0.85rem; }
+.notif-empty i { font-size: 1.5rem; margin-bottom: 0.5rem; display: block; color: #c3cdd9; }
+
+/* ---------- Toast (en haut à droite, glissant) ---------- */
+.attendance-page .toast {
+  top: 88px;
+  bottom: auto;
+  right: 1.25rem;
+  width: auto;
+  min-width: 300px;
+  max-width: 380px;
+  display: block;
+  border-left: 4px solid var(--primary);
+  box-shadow: 0 16px 40px rgba(11, 42, 91, 0.18);
+  transform: translateX(calc(100% + 2rem));
+  transition: transform 0.35s cubic-bezier(.2,.8,.2,1);
+}
+.attendance-page .toast.show { transform: none; animation: none; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 991px) {
+  .attendance-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .page-hero h1 { font-size: 1.3rem; }
+  .page-hero-icon { width: 46px; height: 46px; font-size: 1.15rem; }
+
+  .attendance-page .students-header { flex-direction: column; align-items: flex-start; }
+  .attendance-page .bulk-actions { width: 100%; }
+  .attendance-page .students-table { overflow-x: auto; }
+  .attendance-page .students-table table { min-width: 620px; }
+
+  .attendance-page .action-bar { flex-direction: column; align-items: stretch; bottom: 0.5rem; }
+  .action-hint { display: none; }
+  .action-buttons { flex-direction: column-reverse; }
+  .action-buttons .btn { justify-content: center; width: 100%; }
+
+  .attendance-page .toast {
+    top: auto;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    min-width: 0;
+    max-width: none;
+    transform: translateY(calc(100% + 2rem));
+  }
+}
+
+@media (max-width: 420px) {
+  .attendance-stats { gap: 0.5rem; }
+  .attendance-stats .stat { padding: 0.65rem; gap: 0.5rem; }
+  .attendance-stats .stat > i { width: 32px; height: 32px; font-size: 0.8rem; }
+}
