@@ -86,4 +86,9 @@ urlpatterns = [
     path('api/save-attendance/', views.save_attendance, name='save_attendance'),
     path('api/save-grade/', views.save_grade, name='save_grade'),
   
+  # Gestion des classes
+    path("classes/", views.classe_list, name="classe_list"),
+    path("classes/ajouter/", views.classe_create, name="classe_create"),
+    path("classes/<int:pk>/modifier/", views.classe_update, name="classe_update"),
+    path("classes/<int:pk>/supprimer/", views.classe_delete, name="classe_delete"),
 ]

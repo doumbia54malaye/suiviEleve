@@ -224,3 +224,22 @@ def clean(self):
         raise ValidationError("Les mots de passe ne correspondent pas")
     
     return cleaned_data
+# ---------- gestion des classes ----------
+class ClasseForm(forms.ModelForm):
+    class Meta:
+        model = Classe
+        fields = ["nom", "niveau", "capacite_max"]
+
+    def clean_capacite_max(self):
+        cap = self.cleaned_data["capacite_max"]
+        if cap < 1:
+            raise forms.ValidationError("La capacité doit être d'au moins 1 élève.")
+        return cap
+
+
+def _first_error(form):
+    """Renvoie le premier message d'erreur du formulaire (pour le toast)."""
+    for field, errors in form.errors.items():
+        label = form.fields[field].label if field in form.fields else ""
+        return f"{label} : {errors[0]}" if label else errors[0]
+    return "Formulaire invalide."

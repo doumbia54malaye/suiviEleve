@@ -1,0 +1,484 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des classes · Collège Privé Koroko</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/classes.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  </head>
+  <body class="dashboard-page classes-page">
+    <div id="app">
+      <!-- ========== Sidebar ========== -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+          <div class="logo-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+          <div class="logo-text">
+            <strong>Koroko</strong>
+            <small>Collège Privé</small>
+          </div>
+        </div>
+
+        <nav class="sidebar-menu">
+          <p class="menu-label">Menu</p>
+          <a href="{% url 'gestionAbst:dashboard' %}" class="sidebar-link">
+            <i class="fa-solid fa-gauge-high"></i><span>Tableau de bord</span>
+          </a>
+          <a href="/classes/" class="sidebar-link active">
+            <i class="fa-solid fa-chalkboard"></i><span>Classes</span>
+          </a>
+          <a href="/liste/" class="sidebar-link">
+            <i class="fa-solid fa-users"></i><span>Élèves</span>
+          </a>
+          <a href="/liste_enseignants/" class="sidebar-link">
+            <i class="fa-solid fa-chalkboard-user"></i><span>Enseignants</span>
+          </a>
+          <a href="#" class="sidebar-link">
+            <i class="fa-solid fa-calendar-days"></i><span>Emploi du temps</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-help">
+          <i class="fa-solid fa-headset"></i>
+          <div>
+            <strong>Besoin d'aide ?</strong>
+            <span>Contactez l'administration</span>
+          </div>
+        </div>
+
+        <div class="sidebar-toggle" id="sidebarToggle" title="Réduire le menu">
+          <i class="fa-solid fa-chevron-left"></i>
+        </div>
+      </aside>
+
+      <!-- ========== Main content ========== -->
+      <div class="main-content">
+        <header class="top-navbar">
+          <div class="navbar-left">
+            <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu">
+              <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="navbar-title">
+              <span class="crumb">Administration <i class="fa-solid fa-chevron-right"></i> Classes</span>
+              <span class="today" id="todayDate"></span>
+            </div>
+          </div>
+
+          <div class="navbar-right">
+            <div class="notifications">
+              <button class="notification-btn" id="notificationBtn" aria-label="Notifications">
+                <i class="fa-solid fa-bell"></i>
+              </button>
+              <div class="notification-dropdown" id="notificationDropdown">
+                <h3>Notifications</h3>
+                <div class="notif-empty">
+                  <i class="fa-regular fa-bell-slash"></i>
+                  <p>Aucune nouvelle notification</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="user-menu">
+              <button class="user-btn" id="userBtn">
+                <div class="avatar">
+                  <span id="userInitials">{{ user.first_name.0|default:user.username.0 }}{{ user.last_name.0|default:'' }}</span>
+                </div>
+                <div class="user-info">
+                  <span id="userName">{{ user.get_full_name|default:user.username }}</span>
+                  <span id="userRole" class="user-role">{{ user.get_user_type_display }}</span>
+                </div>
+                <i class="fa-solid fa-chevron-down user-caret"></i>
+              </button>
+              <div class="user-dropdown" id="userDropdown">
+                <h3>Mon compte</h3>
+                <a href="#" class="dropdown-item"><i class="fa-solid fa-user"></i> Profil</a>
+                <div class="dropdown-divider"></div>
+                <form action="{% url 'gestionAbst:logout' %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main class="content-container">
+          <!-- En-tête -->
+          <div class="page-top">
+            <div class="page-hero">
+              <div class="page-hero-icon"><i class="fa-solid fa-chalkboard"></i></div>
+              <div>
+                <h1>Gestion des classes</h1>
+                <p>Créez, modifiez et suivez le remplissage de vos classes.</p>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary btn-add" data-open="create">
+              <i class="fa-solid fa-plus"></i> Nouvelle classe
+            </button>
+          </div>
+
+          <!-- Statistiques -->
+          <section class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon blue"><i class="fa-solid fa-chalkboard"></i></div>
+              <div><strong>{{ total_classes }}</strong><span>Classes</span></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="fa-solid fa-users"></i></div>
+              <div><strong>{{ total_eleves }}</strong><span>Élèves inscrits</span></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon yellow"><i class="fa-solid fa-chair"></i></div>
+              <div><strong>{{ total_capacite }}</strong><span>Places au total</span></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon purple"><i class="fa-solid fa-chart-pie"></i></div>
+              <div><strong>{{ taux_remplissage }}%</strong><span>Taux de remplissage</span></div>
+            </div>
+          </section>
+
+          <!-- Barre d'outils -->
+          <section class="toolbar">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="search" id="searchInput" placeholder="Rechercher une classe…" autocomplete="off">
+            </div>
+
+            <div class="level-filters" id="levelFilters">
+              <button type="button" class="chip active" data-level="all">Toutes</button>
+              {% for niveau in niveaux %}
+                <button type="button" class="chip" data-level="{{ niveau }}">{{ niveau }}</button>
+              {% endfor %}
+            </div>
+
+            <div class="view-toggle" role="group" aria-label="Affichage">
+              <button type="button" class="active" data-view="grid" title="Grille"><i class="fa-solid fa-grip"></i></button>
+              <button type="button" data-view="list" title="Liste"><i class="fa-solid fa-list"></i></button>
+            </div>
+          </section>
+
+          <!-- Liste des classes -->
+          {% if classes %}
+            <section class="classes-grid" id="classesGrid">
+              {% for classe in classes %}
+                {% widthratio classe.nb_eleves|default:0 classe.capacite_max 100 as taux %}
+                <article class="class-card"
+                         data-name="{{ classe.nom|lower }}"
+                         data-level="{{ classe.niveau }}">
+                  <div class="class-top">
+                    <div class="class-avatar">{{ classe.nom|slice:":3"|upper }}</div>
+                    <div class="class-title">
+                      <h3>{{ classe.nom }}</h3>
+                      <span class="level-badge">{{ classe.niveau }}</span>
+                    </div>
+                    <div class="class-actions">
+                      <button type="button" class="icon-btn edit" title="Modifier"
+                              data-open="edit"
+                              data-url="{% url 'gestionAbst:classe_update' classe.pk %}"
+                              data-nom="{{ classe.nom }}"
+                              data-niveau="{{ classe.niveau }}"
+                              data-capacite="{{ classe.capacite_max }}">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button type="button" class="icon-btn delete" title="Supprimer"
+                              data-open="delete"
+                              data-url="{% url 'gestionAbst:classe_delete' classe.pk %}"
+                              data-nom="{{ classe.nom }}">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="class-capacity">
+                    <div class="capacity-row">
+                      <span><i class="fa-solid fa-users"></i> {{ classe.nb_eleves|default:0 }} / {{ classe.capacite_max }} élèves</span>
+                      <strong class="capacity-pct" data-pct="{{ taux }}">{{ taux }}%</strong>
+                    </div>
+                    <div class="progress"><span style="width: {{ taux }}%"></span></div>
+                  </div>
+
+                  <div class="class-footer">
+                    <span><i class="fa-regular fa-calendar"></i> Créée le {{ classe.created_at|date:"d/m/Y" }}</span>
+                    <a href="#" class="see-more">Voir les élèves <i class="fa-solid fa-arrow-right"></i></a>
+                  </div>
+                </article>
+              {% endfor %}
+            </section>
+
+            <div class="empty-state hidden" id="noResult">
+              <div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+              <h3>Aucune classe trouvée</h3>
+              <p>Essayez un autre mot-clé ou un autre niveau.</p>
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <div class="empty-icon"><i class="fa-solid fa-chalkboard"></i></div>
+              <h3>Aucune classe pour l'instant</h3>
+              <p>Commencez par créer votre première classe.</p>
+              <button type="button" class="btn btn-primary" data-open="create">
+                <i class="fa-solid fa-plus"></i> Créer une classe
+              </button>
+            </div>
+          {% endif %}
+        </main>
+      </div>
+
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    </div>
+
+    <!-- ========== Modale : créer / modifier ========== -->
+    <div class="modal" id="classModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-dialog" role="dialog" aria-labelledby="classModalTitle">
+        <form method="post" id="classForm" action="{% url 'gestionAbst:classe_create' %}" data-create-url="{% url 'gestionAbst:classe_create' %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <div class="modal-icon"><i class="fa-solid fa-chalkboard"></i></div>
+            <div>
+              <h2 id="classModalTitle">Nouvelle classe</h2>
+              <p id="classModalSub">Renseignez les informations de la classe.</p>
+            </div>
+            <button type="button" class="modal-close" data-close aria-label="Fermer">&times;</button>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="id_nom">Nom de la classe <span class="text-danger">*</span></label>
+              <div class="field-icon">
+                <i class="fa-solid fa-tag"></i>
+                <input type="text" id="id_nom" name="nom" maxlength="50" placeholder="Ex. 6ème A" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_niveau">Niveau <span class="text-danger">*</span></label>
+              <div class="field-icon">
+                <i class="fa-solid fa-layer-group"></i>
+                <input type="text" id="id_niveau" name="niveau" maxlength="20" list="niveauxList" placeholder="Ex. 6ème" required>
+                <datalist id="niveauxList">
+                  <option value="6ème"><option value="5ème"><option value="4ème"><option value="3ème">
+                  <option value="2nde"><option value="1ère"><option value="Terminale">
+                  {% for niveau in niveaux %}<option value="{{ niveau }}">{% endfor %}
+                </datalist>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="id_capacite_max">Capacité maximale</label>
+              <div class="stepper">
+                <button type="button" data-step="-1" aria-label="Diminuer"><i class="fa-solid fa-minus"></i></button>
+                <input type="number" id="id_capacite_max" name="capacite_max" min="1" max="200" value="30" required>
+                <button type="button" data-step="1" aria-label="Augmenter"><i class="fa-solid fa-plus"></i></button>
+                <span class="stepper-unit">élèves</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-close>Annuler</button>
+            <button type="submit" class="btn btn-primary" id="classSubmit">
+              <i class="fa-solid fa-check"></i> <span>Créer la classe</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========== Modale : suppression ========== -->
+    <div class="modal" id="deleteModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-dialog modal-sm" role="alertdialog" aria-labelledby="deleteTitle">
+        <form method="post" id="deleteForm" action="">
+          {% csrf_token %}
+          <div class="modal-body center">
+            <div class="danger-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h2 id="deleteTitle">Supprimer la classe ?</h2>
+            <p>La classe <strong id="deleteName"></strong> sera définitivement supprimée. Cette action est irréversible.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-close>Annuler</button>
+            <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Supprimer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast">
+      <div class="toast-header">
+        <i class="fa-solid fa-circle-info"></i>
+        <strong class="toast-title">Notification</strong>
+        <button class="toast-close" type="button">&times;</button>
+      </div>
+      <div class="toast-body">Message</div>
+    </div>
+
+    <!-- Messages Django -> toast -->
+    {% if messages %}
+      <script id="djangoMessages" type="application/json">
+        [{% for m in messages %}{"tag": "{{ m.tags|escapejs }}", "text": "{{ m|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+      </script>
+    {% endif %}
+
+    <script src="{% static 'js/common.js' %}"></script>
+    <script>
+      (function () {
+        // ----- Date du jour -----
+        const d = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('todayDate').textContent = d.charAt(0).toUpperCase() + d.slice(1);
+
+        document.getElementById('sidebarOverlay').addEventListener('click', function () {
+          document.getElementById('sidebar').classList.remove('show');
+        });
+
+        // ----- Couleur par niveau -----
+        const palette = ['#3498db', '#30b673', '#f39c12', '#9b59b6', '#e74c3c', '#16a085', '#e67e22', '#2c3e50'];
+        const levels = [];
+        document.querySelectorAll('.class-card').forEach(function (card) {
+          const lvl = card.dataset.level;
+          if (levels.indexOf(lvl) === -1) levels.push(lvl);
+          card.style.setProperty('--c', palette[levels.indexOf(lvl) % palette.length]);
+
+          // État de remplissage
+          const pct = parseInt(card.querySelector('.capacity-pct').dataset.pct, 10) || 0;
+          card.classList.add(pct >= 100 ? 'is-full' : pct >= 85 ? 'is-almost' : 'is-ok');
+          if (pct > 100) card.querySelector('.progress span').style.width = '100%';
+        });
+
+        // ----- Recherche + filtre niveau -----
+        const search = document.getElementById('searchInput');
+        const chips = document.querySelectorAll('#levelFilters .chip');
+        const noResult = document.getElementById('noResult');
+        let currentLevel = 'all';
+
+        function applyFilters() {
+          const q = search.value.trim().toLowerCase();
+          let visible = 0;
+          document.querySelectorAll('.class-card').forEach(function (card) {
+            const ok = card.dataset.name.includes(q) && (currentLevel === 'all' || card.dataset.level === currentLevel);
+            card.classList.toggle('hidden', !ok);
+            if (ok) visible++;
+          });
+          if (noResult) noResult.classList.toggle('hidden', visible > 0);
+        }
+        search.addEventListener('input', applyFilters);
+        chips.forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            chips.forEach(function (c) { c.classList.remove('active'); });
+            chip.classList.add('active');
+            currentLevel = chip.dataset.level;
+            applyFilters();
+          });
+        });
+
+        // ----- Grille / liste -----
+        const grid = document.getElementById('classesGrid');
+        document.querySelectorAll('.view-toggle button').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            document.querySelectorAll('.view-toggle button').forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            if (grid) grid.classList.toggle('as-list', btn.dataset.view === 'list');
+            try { localStorage.setItem('classesView', btn.dataset.view); } catch (e) {}
+          });
+        });
+        try {
+          if (localStorage.getItem('classesView') === 'list') document.querySelector('[data-view="list"]').click();
+        } catch (e) {}
+
+        // ----- Modales -----
+        const classModal = document.getElementById('classModal');
+        const deleteModal = document.getElementById('deleteModal');
+        const form = document.getElementById('classForm');
+
+        function openModal(m) {
+          m.classList.add('open');
+          m.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+          const first = m.querySelector('input:not([type=hidden])');
+          if (first) setTimeout(function () { first.focus(); }, 150);
+        }
+        function closeModals() {
+          document.querySelectorAll('.modal.open').forEach(function (m) {
+            m.classList.remove('open');
+            m.setAttribute('aria-hidden', 'true');
+          });
+          document.body.style.overflow = '';
+        }
+
+        document.addEventListener('click', function (e) {
+          const opener = e.target.closest('[data-open]');
+          if (opener) {
+            const type = opener.dataset.open;
+            if (type === 'create') {
+              form.reset();
+              form.action = form.dataset.createUrl;
+              document.getElementById('classModalTitle').textContent = 'Nouvelle classe';
+              document.getElementById('classModalSub').textContent = 'Renseignez les informations de la classe.';
+              document.querySelector('#classSubmit span').textContent = 'Créer la classe';
+              openModal(classModal);
+            } else if (type === 'edit') {
+              form.action = opener.dataset.url;
+              document.getElementById('id_nom').value = opener.dataset.nom;
+              document.getElementById('id_niveau').value = opener.dataset.niveau;
+              document.getElementById('id_capacite_max').value = opener.dataset.capacite;
+              document.getElementById('classModalTitle').textContent = 'Modifier la classe';
+              document.getElementById('classModalSub').textContent = opener.dataset.nom;
+              document.querySelector('#classSubmit span').textContent = 'Enregistrer';
+              openModal(classModal);
+            } else if (type === 'delete') {
+              document.getElementById('deleteForm').action = opener.dataset.url;
+              document.getElementById('deleteName').textContent = opener.dataset.nom;
+              openModal(deleteModal);
+            }
+          }
+          if (e.target.closest('[data-close]')) closeModals();
+        });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModals(); });
+
+        // Stepper capacité
+        const cap = document.getElementById('id_capacite_max');
+        document.querySelectorAll('.stepper [data-step]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            const v = (parseInt(cap.value, 10) || 0) + parseInt(b.dataset.step, 10);
+            cap.value = Math.min(200, Math.max(1, v));
+          });
+        });
+
+        // ----- Toast pour les messages Django -----
+        const msgEl = document.getElementById('djangoMessages');
+        if (msgEl) {
+          const toast = document.getElementById('toast');
+          const msgs = JSON.parse(msgEl.textContent);
+          msgs.forEach(function (m, i) {
+            setTimeout(function () {
+              const isErr = m.tag.indexOf('error') !== -1;
+              toast.classList.toggle('toast-error', isErr);
+              toast.classList.toggle('toast-success', m.tag.indexOf('success') !== -1);
+              toast.querySelector('.toast-title').textContent = isErr ? 'Erreur' : 'Succès';
+              toast.querySelector('.toast-body').textContent = m.text;
+              toast.classList.add('show');
+              setTimeout(function () { toast.classList.remove('show'); }, 4000);
+            }, i * 4300);
+          });
+          toast.querySelector('.toast-close').addEventListener('click', function () { toast.classList.remove('show'); });
+        }
+                // ----- Ouvrir la fenêtre de création si on arrive avec ?nouveau=1 -----
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('nouveau')) {
+          document.querySelector('[data-open="create"]').click();
+          // Nettoie l'URL pour que la fenêtre ne se rouvre pas au rechargement
+          history.replaceState(null, '', window.location.pathname);
+        }
+      })();
+    </script>
+  </body>
+</html>

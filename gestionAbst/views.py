@@ -19,6 +19,7 @@ from .forms import *
 import json
 import re
 from django.db.models import Q
+from django.db.models import Count, Sum
 
 
 
@@ -1148,3 +1149,63 @@ def get_attendance_details(request, seance_id):
         return JsonResponse({'error': 'Séance non trouvée ou accès non autorisé'}, status=404)
     except Exception as e:
         return JsonResponse({'error': f'Erreur interne du serveur: {e}'}, status=500) 
+
+    # ---------- Liste classes ----------
+@login_required
+def classe_list(request):
+    # ⚠️ Adapte "eleve" au nom de la relation inverse de ton modèle Élève
+    #    (ex. Eleve.classe = ForeignKey(Classe, related_name="eleves") -> Count("eleves")).
+    #    Si tu n'as pas encore de modèle Élève, remplace Count(...) par Value(0).
+    classes = Classe.objects.annotate(nb_eleves=Count("eleves", distinct=True))
+
+    total_capacite = classes.aggregate(t=Sum("capacite_max"))["t"] or 0
+    total_eleves = sum(c.nb_eleves for c in classes)
+    taux = round(total_eleves * 100 / total_capacite) if total_capacite else 0
+
+    context = {
+        "classes": classes,
+        "niveaux": Classe.objects.values_list("niveau", flat=True).distinct().order_by("niveau"),
+        "total_classes": classes.count(),
+        "total_eleves": total_eleves,
+        "total_capacite": total_capacite,
+        "taux_remplissage": taux,
+    }
+    return render(request, "classes.html", context)
+
+
+# ---------- Création classes ----------
+@login_required
+@require_POST
+def classe_create(request):
+    form = ClasseForm(request.POST)
+    if form.is_valid():
+        classe = form.save()
+        messages.success(request, f"La classe « {classe.nom} » a été créée.")
+    else:
+        messages.error(request, _first_error(form))
+    return redirect("gestionAbst:classe_list")
+
+
+# ---------- Modification classes ----------
+@login_required
+@require_POST
+def classe_update(request, pk):
+    classe = get_object_or_404(Classe, pk=pk)
+    form = ClasseForm(request.POST, instance=classe)
+    if form.is_valid():
+        form.save()
+        messages.success(request, f"La classe « {classe.nom} » a été mise à jour.")
+    else:
+        messages.error(request, _first_error(form))
+    return redirect("gestionAbst:classe_list")
+
+
+# ---------- Suppression classes----------
+@login_required
+@require_POST
+def classe_delete(request, pk):
+    classe = get_object_or_404(Classe, pk=pk)
+    nom = classe.nom
+    classe.delete()
+    messages.success(request, f"La classe « {nom} » a été supprimée.")
+    return redirect("gestionAbst:classe_list")

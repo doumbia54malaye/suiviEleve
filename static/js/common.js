@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <i class="fa-solid fa-chalkboard-teacher"></i>
             <span>Enseignants</span>
           </a>
-          <a href="#" class="sidebar-link">
+          <a href="/classes/" class="sidebar-link">
             <i class="fa-solid fa-book-open"></i>
             <span>Classes</span>
           </a>
